@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnFresh;
     private Button btnDryGoods;
     private Button btnDairy;
+    private Button btnRecipes;
     private Button btnAddIngredient;
 
     private LinearLayout ingredientContainer;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         btnFresh = findViewById(R.id.btnFresh);
         btnDryGoods = findViewById(R.id.btnDryGoods);
         btnDairy = findViewById(R.id.btnDairy);
+        btnRecipes = findViewById(R.id.btnRecipes);
         btnAddIngredient = findViewById(R.id.btnAddIngredient);
 
         ingredientContainer = findViewById(R.id.ingredientContainer);
@@ -151,6 +153,20 @@ public class MainActivity extends AppCompatActivity {
             updateCategoryButtons();
 
             loadIngredients();
+        });
+
+        // ---------------------------------------------------------
+        // RECIPES BUTTON
+        // ---------------------------------------------------------
+
+        btnRecipes.setOnClickListener(view -> {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    RecipesActivity.class
+            );
+
+            startActivity(intent);
         });
 
         // ---------------------------------------------------------
@@ -448,10 +464,6 @@ public class MainActivity extends AppCompatActivity {
             String unit,
             String expiryDate
     ) {
-
-        // ---------------------------------------------------------
-        // MAIN INGREDIENT CONTAINER
-        // ---------------------------------------------------------
 
         LinearLayout itemLayout =
                 new LinearLayout(this);
