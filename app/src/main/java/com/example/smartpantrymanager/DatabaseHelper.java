@@ -109,4 +109,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return count;
     }
+
+    public int updateIngredient(
+            long id,
+            String name,
+            String quantity,
+            String unit,
+            String expiryDate
+    ) {
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(COLUMN_NAME, name);
+        values.put(COLUMN_QUANTITY, quantity);
+        values.put(COLUMN_UNIT, unit);
+        values.put(COLUMN_EXPIRY_DATE, expiryDate);
+
+        return db.update(
+                TABLE_INGREDIENTS,
+                values,
+                COLUMN_ID + "=?",
+                new String[]{String.valueOf(id)}
+        );
+    }
+
+    public int deleteIngredient(long id) {
+
+        SQLiteDatabase db = getWritableDatabase();
+
+        return db.delete(
+                TABLE_INGREDIENTS,
+                COLUMN_ID + "=?",
+                new String[]{String.valueOf(id)}
+        );
+    }
 }

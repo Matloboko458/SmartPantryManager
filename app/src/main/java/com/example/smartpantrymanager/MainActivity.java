@@ -1,5 +1,6 @@
 package com.example.smartpantrymanager;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -13,7 +14,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private String currentCategory = "All";
     private String currentSearch = "";
 
-    // Green theme colours
     private final int GREEN_DARK = Color.rgb(56, 142, 60);
     private final int GREEN = Color.rgb(76, 175, 80);
     private final int GREEN_LIGHT = Color.rgb(129, 199, 132);
@@ -51,15 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        // =========================================================
-        // DATABASE
-        // =========================================================
-
         databaseHelper = new DatabaseHelper(this);
-
-        // =========================================================
-        // CONNECT XML VIEWS
-        // =========================================================
 
         searchPantry = findViewById(R.id.searchPantry);
 
@@ -92,10 +86,6 @@ public class MainActivity extends AppCompatActivity {
 
         btnAddIngredient =
                 findViewById(R.id.btnAddIngredient);
-
-        // =========================================================
-        // CATEGORY BUTTONS
-        // =========================================================
 
         btnAll.setOnClickListener(view -> {
 
@@ -133,10 +123,6 @@ public class MainActivity extends AppCompatActivity {
             loadIngredients();
         });
 
-        // =========================================================
-        // RECIPES BUTTON
-        // =========================================================
-
         btnRecipes.setOnClickListener(view -> {
 
             Intent intent = new Intent(
@@ -147,10 +133,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // =========================================================
-        // ADD INGREDIENT BUTTON
-        // =========================================================
-
         btnAddIngredient.setOnClickListener(view -> {
 
             Intent intent = new Intent(
@@ -160,10 +142,6 @@ public class MainActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
-
-        // =========================================================
-        // SEARCH
-        // =========================================================
 
         searchPantry.addTextChangedListener(
                 new TextWatcher() {
@@ -199,22 +177,10 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // =========================================================
-        // INITIAL BUTTON STYLE
-        // =========================================================
-
         updateCategoryButtons();
-
-        // =========================================================
-        // LOAD PANTRY
-        // =========================================================
 
         loadIngredients();
     }
-
-    // =============================================================
-    // RELOAD WHEN RETURNING TO MAIN SCREEN
-    // =============================================================
 
     @Override
     protected void onResume() {
@@ -222,14 +188,9 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         if (databaseHelper != null) {
-
             loadIngredients();
         }
     }
-
-    // =============================================================
-    // LOAD INGREDIENTS
-    // =============================================================
 
     private void loadIngredients() {
 
@@ -255,6 +216,9 @@ public class MainActivity extends AppCompatActivity {
 
                 do {
 
+                    long id =
+                            getColumnId(cursor);
+
                     String name =
                             getColumnValue(
                                     cursor,
@@ -279,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
                                     DatabaseHelper.COLUMN_EXPIRY_DATE
                             );
 
-                    // Search filter
                     if (!currentSearch.isEmpty()) {
 
                         String searchableText =
@@ -298,7 +261,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    // Category filter
                     if (!matchesCategory(
                             name,
                             unit
@@ -308,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     addIngredientToScreen(
+                            id,
                             name,
                             quantity,
                             unit,
@@ -323,17 +286,18 @@ public class MainActivity extends AppCompatActivity {
 
             e.printStackTrace();
 
+            Toast.makeText(
+                    this,
+                    "Error loading ingredients.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
         } finally {
 
             if (cursor != null) {
-
                 cursor.close();
             }
         }
-
-        // =========================================================
-        // UPDATE ITEM COUNT
-        // =========================================================
 
         if (visibleCount == 1) {
 
@@ -347,10 +311,6 @@ public class MainActivity extends AppCompatActivity {
                     visibleCount + " items"
             );
         }
-
-        // =========================================================
-        // EMPTY STATE
-        // =========================================================
 
         if (visibleCount == 0) {
 
@@ -395,9 +355,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // =============================================================
-    // GET DATABASE COLUMN SAFELY
-    // =============================================================
+    private long getColumnId(Cursor cursor) {
+
+        int columnIndex =
+                cursor.getColumnIndex(
+                        DatabaseHelper.COLUMN_ID
+                );
+
+        if (columnIndex == -1) {
+            return -1;
+        }
+
+        return cursor.getLong(columnIndex);
+    }
 
     private String getColumnValue(
             Cursor cursor,
@@ -408,7 +378,6 @@ public class MainActivity extends AppCompatActivity {
                 cursor.getColumnIndex(columnName);
 
         if (columnIndex == -1) {
-
             return "";
         }
 
@@ -416,16 +385,11 @@ public class MainActivity extends AppCompatActivity {
                 cursor.getString(columnIndex);
 
         if (value == null) {
-
             return "";
         }
 
         return value;
     }
-
-    // =============================================================
-    // CATEGORY FILTER
-    // =============================================================
 
     private boolean matchesCategory(
             String name,
@@ -433,7 +397,6 @@ public class MainActivity extends AppCompatActivity {
     ) {
 
         if (currentCategory.equals("All")) {
-
             return true;
         }
 
@@ -442,10 +405,6 @@ public class MainActivity extends AppCompatActivity {
 
         String ingredientUnit =
                 unit.toLowerCase().trim();
-
-        // =========================================================
-        // FRESH
-        // =========================================================
 
         if (currentCategory.equals("Fresh")) {
 
@@ -465,10 +424,6 @@ public class MainActivity extends AppCompatActivity {
                     || ingredient.contains("fruit");
         }
 
-        // =========================================================
-        // DAIRY
-        // =========================================================
-
         if (currentCategory.equals("Dairy")) {
 
             return ingredient.contains("milk")
@@ -480,10 +435,6 @@ public class MainActivity extends AppCompatActivity {
                     || ingredient.contains("custard")
                     || ingredient.contains("cheddar");
         }
-
-        // =========================================================
-        // DRY GOODS
-        // =========================================================
 
         if (currentCategory.equals("Dry Goods")) {
 
@@ -510,11 +461,8 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    // =============================================================
-    // DISPLAY INGREDIENT
-    // =============================================================
-
     private void addIngredientToScreen(
+            long id,
             String name,
             String quantity,
             String unit,
@@ -548,24 +496,14 @@ public class MainActivity extends AppCompatActivity {
                 20
         );
 
-        card.setLayoutParams(
-                cardParams
-        );
-
-        // =========================================================
-        // INGREDIENT NAME
-        // =========================================================
+        card.setLayoutParams(cardParams);
 
         TextView nameText =
                 new TextView(this);
 
-        nameText.setText(
-                name
-        );
+        nameText.setText(name);
 
-        nameText.setTextSize(
-                22
-        );
+        nameText.setTextSize(22);
 
         nameText.setTextColor(
                 Color.rgb(
@@ -580,10 +518,6 @@ public class MainActivity extends AppCompatActivity {
                 Typeface.BOLD
         );
 
-        // =========================================================
-        // QUANTITY
-        // =========================================================
-
         TextView quantityText =
                 new TextView(this);
 
@@ -594,9 +528,7 @@ public class MainActivity extends AppCompatActivity {
                         + unit
         );
 
-        quantityText.setTextSize(
-                18
-        );
+        quantityText.setTextSize(18);
 
         quantityText.setTextColor(
                 Color.rgb(
@@ -613,10 +545,6 @@ public class MainActivity extends AppCompatActivity {
                 0
         );
 
-        // =========================================================
-        // EXPIRY DATE
-        // =========================================================
-
         TextView expiryText =
                 new TextView(this);
 
@@ -625,9 +553,7 @@ public class MainActivity extends AppCompatActivity {
                         + expiryDate
         );
 
-        expiryText.setTextSize(
-                18
-        );
+        expiryText.setTextSize(18);
 
         expiryText.setTextColor(
                 Color.rgb(
@@ -641,33 +567,353 @@ public class MainActivity extends AppCompatActivity {
                 0,
                 6,
                 0,
+                12
+        );
+
+        card.addView(nameText);
+
+        card.addView(quantityText);
+
+        card.addView(expiryText);
+
+        LinearLayout buttonRow =
+                new LinearLayout(this);
+
+        buttonRow.setOrientation(
+                LinearLayout.HORIZONTAL
+        );
+
+        buttonRow.setGravity(
+                android.view.Gravity.CENTER_VERTICAL
+        );
+
+        Button editButton =
+                new Button(this);
+
+        editButton.setText("Edit");
+
+        editButton.setTextColor(Color.WHITE);
+
+        editButton.setTextSize(16);
+
+        editButton.setBackgroundTintList(
+                ColorStateList.valueOf(GREEN)
+        );
+
+        LinearLayout.LayoutParams editParams =
+                new LinearLayout.LayoutParams(
+                        0,
+                        56,
+                        1
+                );
+
+        editParams.setMargins(
+                0,
+                0,
+                8,
                 0
         );
 
-        // =========================================================
-        // ADD TO CARD
-        // =========================================================
+        editButton.setLayoutParams(editParams);
 
-        card.addView(
-                nameText
+        Button deleteButton =
+                new Button(this);
+
+        deleteButton.setText("Delete");
+
+        deleteButton.setTextColor(Color.WHITE);
+
+        deleteButton.setTextSize(16);
+
+        deleteButton.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        Color.rgb(198, 40, 40)
+                )
         );
 
-        card.addView(
-                quantityText
+        LinearLayout.LayoutParams deleteParams =
+                new LinearLayout.LayoutParams(
+                        0,
+                        56,
+                        1
+                );
+
+        deleteParams.setMargins(
+                8,
+                0,
+                0,
+                0
         );
 
-        card.addView(
-                expiryText
+        deleteButton.setLayoutParams(
+                deleteParams
         );
 
-        ingredientContainer.addView(
-                card
+        editButton.setOnClickListener(
+                view -> showEditIngredientDialog(
+                        id,
+                        name,
+                        quantity,
+                        unit,
+                        expiryDate
+                )
         );
+
+        deleteButton.setOnClickListener(
+                view -> showDeleteConfirmation(
+                        id,
+                        name
+                )
+        );
+
+        buttonRow.addView(editButton);
+
+        buttonRow.addView(deleteButton);
+
+        card.addView(buttonRow);
+
+        ingredientContainer.addView(card);
     }
 
-    // =============================================================
-    // CATEGORY BUTTON COLOURS
-    // =============================================================
+    private void showEditIngredientDialog(
+            long id,
+            String currentName,
+            String currentQuantity,
+            String currentUnit,
+            String currentExpiryDate
+    ) {
+
+        LinearLayout layout =
+                new LinearLayout(this);
+
+        layout.setOrientation(
+                LinearLayout.VERTICAL
+        );
+
+        layout.setPadding(
+                40,
+                10,
+                40,
+                10
+        );
+
+        EditText nameInput =
+                new EditText(this);
+
+        nameInput.setHint("Ingredient Name");
+
+        nameInput.setSingleLine(true);
+
+        nameInput.setText(currentName);
+
+        EditText quantityInput =
+                new EditText(this);
+
+        quantityInput.setHint("Quantity");
+
+        quantityInput.setSingleLine(true);
+
+        quantityInput.setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER
+                        | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+        );
+
+        quantityInput.setText(currentQuantity);
+
+        EditText unitInput =
+                new EditText(this);
+
+        unitInput.setHint("Unit");
+
+        unitInput.setSingleLine(true);
+
+        unitInput.setText(currentUnit);
+
+        EditText expiryInput =
+                new EditText(this);
+
+        expiryInput.setHint("DD/MM/YYYY");
+
+        expiryInput.setSingleLine(true);
+
+        expiryInput.setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER
+        );
+
+        expiryInput.setFilters(new android.text.InputFilter[]{
+                new android.text.InputFilter.LengthFilter(10)
+        });
+
+        expiryInput.setText(currentExpiryDate);
+
+        layout.addView(nameInput);
+
+        layout.addView(quantityInput);
+
+        layout.addView(unitInput);
+
+        layout.addView(expiryInput);
+
+        AlertDialog dialog =
+                new AlertDialog.Builder(this)
+                        .setTitle("Edit Ingredient")
+                        .setView(layout)
+                        .setNegativeButton(
+                                "Cancel",
+                                null
+                        )
+                        .setPositiveButton(
+                                "Save",
+                                null
+                        )
+                        .create();
+
+        dialog.setOnShowListener(
+                dialogInterface -> {
+
+                    Button saveButton =
+                            dialog.getButton(
+                                    AlertDialog.BUTTON_POSITIVE
+                            );
+
+                    saveButton.setTextColor(
+                            GREEN_DARK
+                    );
+
+                    saveButton.setOnClickListener(
+                            view -> {
+
+                                String newName =
+                                        nameInput.getText()
+                                                .toString()
+                                                .trim();
+
+                                String newQuantity =
+                                        quantityInput.getText()
+                                                .toString()
+                                                .trim();
+
+                                String newUnit =
+                                        unitInput.getText()
+                                                .toString()
+                                                .trim();
+
+                                String newExpiry =
+                                        expiryInput.getText()
+                                                .toString()
+                                                .trim();
+
+                                if (newName.isEmpty()
+                                        || newQuantity.isEmpty()
+                                        || newUnit.isEmpty()
+                                        || newExpiry.isEmpty()) {
+
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            "Please complete all fields.",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+
+                                    return;
+                                }
+
+                                if (!newExpiry.matches(
+                                        "\\d{2}/\\d{2}/\\d{4}"
+                                )) {
+
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            "Enter the expiry date as DD/MM/YYYY.",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+
+                                    return;
+                                }
+
+                                int result =
+                                        databaseHelper.updateIngredient(
+                                                id,
+                                                newName,
+                                                newQuantity,
+                                                newUnit,
+                                                newExpiry
+                                        );
+
+                                if (result > 0) {
+
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            "Ingredient updated.",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+
+                                    dialog.dismiss();
+
+                                    loadIngredients();
+
+                                } else {
+
+                                    Toast.makeText(
+                                            MainActivity.this,
+                                            "Failed to update ingredient.",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+                                }
+                            }
+                    );
+                }
+        );
+
+        dialog.show();
+    }
+
+    private void showDeleteConfirmation(
+            long id,
+            String name
+    ) {
+
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Ingredient")
+                .setMessage(
+                        "Are you sure you want to delete "
+                                + name
+                                + "?"
+                )
+                .setNegativeButton(
+                        "Cancel",
+                        null
+                )
+                .setPositiveButton(
+                        "Delete",
+                        (dialog, which) -> {
+
+                            int result =
+                                    databaseHelper.deleteIngredient(
+                                            id
+                                    );
+
+                            if (result > 0) {
+
+                                Toast.makeText(
+                                        MainActivity.this,
+                                        "Ingredient deleted.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                loadIngredients();
+
+                            } else {
+
+                                Toast.makeText(
+                                        MainActivity.this,
+                                        "Failed to delete ingredient.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            }
+                        }
+                )
+                .show();
+    }
 
     private void updateCategoryButtons() {
 
@@ -678,8 +924,6 @@ public class MainActivity extends AppCompatActivity {
 
             return;
         }
-
-        // ALL
 
         if (currentCategory.equals("All")) {
 
@@ -706,8 +950,6 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-        // FRESH
-
         if (currentCategory.equals("Fresh")) {
 
             btnFresh.setBackgroundTintList(
@@ -732,8 +974,6 @@ public class MainActivity extends AppCompatActivity {
                     DARK_GREEN_TEXT
             );
         }
-
-        // DRY GOODS
 
         if (currentCategory.equals("Dry Goods")) {
 
@@ -760,8 +1000,6 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-        // DAIRY
-
         if (currentCategory.equals("Dairy")) {
 
             btnDairy.setBackgroundTintList(
@@ -787,8 +1025,6 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-        // RECIPES
-
         if (btnRecipes != null) {
 
             btnRecipes.setBackgroundTintList(
@@ -801,8 +1037,6 @@ public class MainActivity extends AppCompatActivity {
                     Color.WHITE
             );
         }
-
-        // ADD INGREDIENT
 
         if (btnAddIngredient != null) {
 
