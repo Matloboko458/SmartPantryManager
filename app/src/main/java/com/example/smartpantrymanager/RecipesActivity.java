@@ -1,20 +1,27 @@
 package com.example.smartpantrymanager;
 
+import android.app.AlertDialog;
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
+import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
 
 public class RecipesActivity extends AppCompatActivity {
 
     private LinearLayout recipeContainer;
+    private Button btnAddRecipe;
+    private Button btnBack;
+
+    private final ArrayList<Recipe> recipes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,255 +29,515 @@ public class RecipesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipes);
 
         recipeContainer = findViewById(R.id.recipeContainer);
+        btnAddRecipe = findViewById(R.id.btnAddRecipe);
+        btnBack = findViewById(R.id.btnBack);
 
-        Button btnBack = findViewById(R.id.btnBack);
+        // Back button
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
 
-        btnBack.setOnClickListener(v -> finish());
+        // Android system back button
+        getOnBackPressedDispatcher().addCallback(
+                this,
+                new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        finish();
+                    }
+                }
+        );
 
-        addRecipe(
+        // Add Recipe button
+        if (btnAddRecipe != null) {
+            btnAddRecipe.setOnClickListener(v -> showAddRecipeDialog());
+        }
+
+        loadDefaultRecipes();
+        displayRecipes();
+    }
+
+    private void loadDefaultRecipes() {
+
+        recipes.clear();
+
+        recipes.add(new Recipe(
                 "Egg & Cheese Toast",
+                "A quick breakfast made with eggs, toasted bread and cheese.",
                 "Eggs, Bread, Cheese",
                 "10 minutes",
                 "Easy",
-                "A quick breakfast made with eggs, toasted bread and cheese.",
-                "Ingredients:\n" +
-                        "• 2 eggs\n" +
-                        "• 2 slices of bread\n" +
-                        "• 2 slices of cheese\n" +
-                        "• Salt and pepper\n\n" +
-                        "Instructions:\n" +
-                        "1. Beat the eggs in a bowl.\n" +
+                "2 eggs\n" +
+                        "2 slices of bread\n" +
+                        "2 slices of cheese\n" +
+                        "Salt and pepper",
+                "1. Beat the eggs in a bowl.\n" +
                         "2. Cook the eggs in a pan.\n" +
                         "3. Toast the bread.\n" +
                         "4. Add the cheese and cooked eggs.\n" +
                         "5. Season with salt and pepper."
-        );
+        ));
 
-        addRecipe(
+        recipes.add(new Recipe(
                 "Creamy Pasta",
+                "A simple creamy pasta recipe using basic pantry ingredients.",
                 "Pasta, Milk, Cheese",
                 "20 minutes",
                 "Easy",
-                "A simple creamy pasta recipe using basic pantry ingredients.",
-                "Ingredients:\n" +
-                        "• 250 g pasta\n" +
-                        "• 1 cup milk\n" +
-                        "• 1 cup grated cheese\n" +
-                        "• Salt and pepper\n\n" +
-                        "Instructions:\n" +
-                        "1. Cook the pasta according to the package instructions.\n" +
-                        "2. Drain the pasta.\n" +
-                        "3. Heat the milk in a pan.\n" +
-                        "4. Add the cheese and stir until melted.\n" +
-                        "5. Add the pasta and mix well.\n" +
-                        "6. Season and serve."
-        );
+                "Pasta\n" +
+                        "Milk\n" +
+                        "Cheese\n" +
+                        "Salt and pepper",
+                "1. Cook the pasta.\n" +
+                        "2. Heat the milk in a pan.\n" +
+                        "3. Add the cheese.\n" +
+                        "4. Add the cooked pasta.\n" +
+                        "5. Season and serve."
+        ));
 
-        addRecipe(
+        recipes.add(new Recipe(
                 "Chicken Rice Bowl",
+                "A filling rice bowl made with chicken and vegetables.",
                 "Chicken, Rice, Vegetables",
                 "30 minutes",
                 "Medium",
-                "A filling rice bowl made with chicken and vegetables.",
-                "Ingredients:\n" +
-                        "• 1 cup rice\n" +
-                        "• 250 g chicken\n" +
-                        "• Mixed vegetables\n" +
-                        "• Cooking oil\n" +
-                        "• Salt and pepper\n\n" +
-                        "Instructions:\n" +
-                        "1. Cook the rice.\n" +
-                        "2. Cut the chicken into small pieces.\n" +
-                        "3. Cook the chicken in a pan.\n" +
-                        "4. Add the vegetables.\n" +
-                        "5. Season to taste.\n" +
-                        "6. Serve the chicken and vegetables over rice."
-        );
-
-        addRecipe(
-                "Pancakes",
-                "Flour, Eggs, Milk",
-                "15 minutes",
-                "Easy",
-                "Simple homemade pancakes suitable for breakfast.",
-                "Ingredients:\n" +
-                        "• 1 cup flour\n" +
-                        "• 1 egg\n" +
-                        "• 1 cup milk\n" +
-                        "• 1 tablespoon sugar\n" +
-                        "• 1 teaspoon baking powder\n\n" +
-                        "Instructions:\n" +
-                        "1. Mix the flour, sugar and baking powder.\n" +
-                        "2. Add the egg and milk.\n" +
-                        "3. Mix until smooth.\n" +
-                        "4. Heat a lightly oiled pan.\n" +
-                        "5. Pour in some batter.\n" +
-                        "6. Cook both sides until golden."
-        );
-
-        addRecipe(
-                "Vegetable Omelette",
-                "Eggs, Vegetables, Cheese",
-                "15 minutes",
-                "Easy",
-                "A healthy omelette using eggs and vegetables.",
-                "Ingredients:\n" +
-                        "• 3 eggs\n" +
-                        "• Mixed vegetables\n" +
-                        "• Cheese\n" +
-                        "• Salt and pepper\n\n" +
-                        "Instructions:\n" +
-                        "1. Beat the eggs.\n" +
-                        "2. Chop the vegetables.\n" +
-                        "3. Cook the vegetables briefly.\n" +
-                        "4. Add the eggs.\n" +
-                        "5. Add cheese.\n" +
-                        "6. Fold the omelette and serve."
-        );
+                "Chicken\n" +
+                        "Rice\n" +
+                        "Mixed vegetables\n" +
+                        "Salt and pepper",
+                "1. Cook the rice.\n" +
+                        "2. Cook the chicken thoroughly.\n" +
+                        "3. Cook the vegetables.\n" +
+                        "4. Combine the rice, chicken and vegetables.\n" +
+                        "5. Season and serve."
+        ));
     }
 
-    private void addRecipe(
-            String recipeName,
-            String ingredients,
-            String cookingTime,
-            String difficulty,
-            String description,
-            String instructions
-    ) {
+    private void displayRecipes() {
 
-        LinearLayout card = new LinearLayout(this);
+        if (recipeContainer == null) {
+            return;
+        }
 
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(24, 24, 24, 24);
+        recipeContainer.removeAllViews();
 
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(Color.WHITE);
-        background.setCornerRadius(24);
-        background.setStroke(2, Color.rgb(225, 225, 225));
+        for (int i = 0; i < recipes.size(); i++) {
 
-        card.setBackground(background);
+            final int position = i;
+            Recipe recipe = recipes.get(i);
 
-        LinearLayout.LayoutParams cardParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
+            LinearLayout card = new LinearLayout(this);
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(16, 16, 16, 16);
 
-        cardParams.setMargins(0, 0, 0, 20);
+            LinearLayout.LayoutParams cardParams =
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
 
-        card.setLayoutParams(cardParams);
+            cardParams.setMargins(0, 0, 0, 20);
+            card.setLayoutParams(cardParams);
 
-        TextView title = new TextView(this);
+            TextView title = new TextView(this);
+            title.setText(recipe.name);
+            title.setTextSize(28);
+            title.setTextColor(0xFF111111);
+            title.setTypeface(null, Typeface.BOLD);
 
-        title.setText(recipeName);
-        title.setTextColor(Color.rgb(17, 17, 17));
-        title.setTextSize(23);
-        title.setTypeface(null, Typeface.BOLD);
+            TextView description = new TextView(this);
+            description.setText(recipe.description);
+            description.setTextSize(18);
+            description.setTextColor(0xFF666666);
+            description.setPadding(0, 8, 0, 8);
 
-        card.addView(title);
+            TextView ingredients = new TextView(this);
+            ingredients.setText("Ingredients: " + recipe.ingredients);
+            ingredients.setTextSize(17);
+            ingredients.setTextColor(0xFF666666);
 
-        TextView descriptionText = new TextView(this);
+            TextView details = new TextView(this);
+            details.setText(
+                    "Cooking time: " + recipe.cookingTime +
+                            "     Difficulty: " + recipe.difficulty
+            );
+            details.setTextSize(17);
+            details.setTextColor(0xFF666666);
+            details.setPadding(0, 8, 0, 12);
 
-        descriptionText.setText(description);
-        descriptionText.setTextColor(Color.rgb(100, 100, 100));
-        descriptionText.setTextSize(16);
+            // VIEW RECIPE - LIGHT GREEN
+            Button viewButton = new Button(this);
+            viewButton.setText("View Recipe");
+            viewButton.setTextSize(18);
+            viewButton.setTextColor(0xFF1B5E20);
+            viewButton.setBackgroundTintList(
+                    ColorStateList.valueOf(0xFF81C784)
+            );
 
-        LinearLayout.LayoutParams descriptionParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
+            // EDIT RECIPE - MEDIUM GREEN
+            Button editButton = new Button(this);
+            editButton.setText("Edit Recipe");
+            editButton.setTextSize(17);
+            editButton.setTextColor(0xFF1B5E20);
+            editButton.setBackgroundTintList(
+                    ColorStateList.valueOf(0xFF66BB6A)
+            );
 
-        descriptionParams.setMargins(0, 10, 0, 12);
+            // DELETE RECIPE - SOFT RED
+            Button deleteButton = new Button(this);
+            deleteButton.setText("Delete Recipe");
+            deleteButton.setTextSize(17);
+            deleteButton.setTextColor(0xFF8B0000);
+            deleteButton.setBackgroundTintList(
+                    ColorStateList.valueOf(0xFFEF9A9A)
+            );
 
-        descriptionText.setLayoutParams(descriptionParams);
+            viewButton.setOnClickListener(v ->
+                    showRecipeDialog(recipe)
+            );
 
-        card.addView(descriptionText);
+            editButton.setOnClickListener(v ->
+                    showEditRecipeDialog(position)
+            );
 
-        TextView ingredientText = new TextView(this);
+            deleteButton.setOnClickListener(v ->
+                    confirmDeleteRecipe(position)
+            );
 
-        ingredientText.setText("Ingredients: " + ingredients);
-        ingredientText.setTextColor(Color.rgb(70, 70, 70));
-        ingredientText.setTextSize(16);
+            card.addView(title);
+            card.addView(description);
+            card.addView(ingredients);
+            card.addView(details);
+            card.addView(viewButton);
+            card.addView(editButton);
+            card.addView(deleteButton);
 
-        card.addView(ingredientText);
-
-        TextView timeText = new TextView(this);
-
-        timeText.setText(
-                "Cooking time: " + cookingTime +
-                        "     Difficulty: " + difficulty
-        );
-
-        timeText.setTextColor(Color.rgb(90, 90, 90));
-        timeText.setTextSize(15);
-
-        LinearLayout.LayoutParams timeParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        timeParams.setMargins(0, 12, 0, 12);
-
-        timeText.setLayoutParams(timeParams);
-
-        card.addView(timeText);
-
-        Button viewRecipeButton = new Button(this);
-
-        viewRecipeButton.setText("View Recipe");
-        viewRecipeButton.setTextColor(Color.rgb(56, 33, 109));
-        viewRecipeButton.setTextSize(16);
-        viewRecipeButton.setAllCaps(false);
-
-        viewRecipeButton.setBackgroundColor(
-                Color.rgb(199, 165, 240)
-        );
-
-        viewRecipeButton.setOnClickListener(
-                v -> showRecipeDetails(
-                        recipeName,
-                        ingredients,
-                        cookingTime,
-                        difficulty,
-                        description,
-                        instructions
-                )
-        );
-
-        card.addView(viewRecipeButton);
-
-        recipeContainer.addView(card);
+            recipeContainer.addView(card);
+        }
     }
 
-    private void showRecipeDetails(
-            String recipeName,
-            String ingredients,
-            String cookingTime,
-            String difficulty,
-            String description,
-            String instructions
-    ) {
+    private void showRecipeDialog(Recipe recipe) {
 
         String message =
-                description +
-                        "\n\n" +
-                        "Ingredients:\n" +
-                        ingredients +
-                        "\n\n" +
-                        "Cooking Time: " +
-                        cookingTime +
-                        "\n" +
-                        "Difficulty: " +
-                        difficulty +
-                        "\n\n" +
-                        instructions;
+                recipe.description +
+                        "\n\nIngredients:\n" +
+                        recipe.ingredientsDetailed +
+                        "\n\nCooking Time: " +
+                        recipe.cookingTime +
+                        "\nDifficulty: " +
+                        recipe.difficulty +
+                        "\n\nInstructions:\n" +
+                        recipe.instructions;
 
         new AlertDialog.Builder(this)
-                .setTitle(recipeName)
+                .setTitle(recipe.name)
                 .setMessage(message)
                 .setPositiveButton("Close", null)
                 .show();
+    }
+
+    private void showAddRecipeDialog() {
+
+        LinearLayout layout = createRecipeInputLayout();
+
+        EditText nameInput = (EditText) layout.getChildAt(0);
+        EditText descriptionInput = (EditText) layout.getChildAt(1);
+        EditText ingredientsInput = (EditText) layout.getChildAt(2);
+        EditText timeInput = (EditText) layout.getChildAt(3);
+        EditText difficultyInput = (EditText) layout.getChildAt(4);
+        EditText detailedIngredientsInput =
+                (EditText) layout.getChildAt(5);
+        EditText instructionsInput =
+                (EditText) layout.getChildAt(6);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Add Recipe")
+                .setView(layout)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Add", null)
+                .create();
+
+        dialog.setOnShowListener(d -> {
+
+            Button addButton =
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+            addButton.setOnClickListener(v -> {
+
+                String name =
+                        nameInput.getText().toString().trim();
+
+                String description =
+                        descriptionInput.getText().toString().trim();
+
+                String ingredients =
+                        ingredientsInput.getText().toString().trim();
+
+                String time =
+                        timeInput.getText().toString().trim();
+
+                String difficulty =
+                        difficultyInput.getText().toString().trim();
+
+                String detailedIngredients =
+                        detailedIngredientsInput
+                                .getText()
+                                .toString()
+                                .trim();
+
+                String instructions =
+                        instructionsInput
+                                .getText()
+                                .toString()
+                                .trim();
+
+                if (name.isEmpty()) {
+                    nameInput.setError("Enter a recipe name");
+                    return;
+                }
+
+                if (ingredients.isEmpty()) {
+                    ingredientsInput.setError("Enter the ingredients");
+                    return;
+                }
+
+                recipes.add(new Recipe(
+                        name,
+                        description,
+                        ingredients,
+                        time,
+                        difficulty,
+                        detailedIngredients,
+                        instructions
+                ));
+
+                displayRecipes();
+
+                Toast.makeText(
+                        RecipesActivity.this,
+                        "Recipe added",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                dialog.dismiss();
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void showEditRecipeDialog(int position) {
+
+        Recipe recipe = recipes.get(position);
+
+        LinearLayout layout = createRecipeInputLayout();
+
+        EditText nameInput = (EditText) layout.getChildAt(0);
+        EditText descriptionInput = (EditText) layout.getChildAt(1);
+        EditText ingredientsInput = (EditText) layout.getChildAt(2);
+        EditText timeInput = (EditText) layout.getChildAt(3);
+        EditText difficultyInput = (EditText) layout.getChildAt(4);
+        EditText detailedIngredientsInput =
+                (EditText) layout.getChildAt(5);
+        EditText instructionsInput =
+                (EditText) layout.getChildAt(6);
+
+        nameInput.setText(recipe.name);
+        descriptionInput.setText(recipe.description);
+        ingredientsInput.setText(recipe.ingredients);
+        timeInput.setText(recipe.cookingTime);
+        difficultyInput.setText(recipe.difficulty);
+        detailedIngredientsInput.setText(
+                recipe.ingredientsDetailed
+        );
+        instructionsInput.setText(recipe.instructions);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Edit Recipe")
+                .setView(layout)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Save", null)
+                .create();
+
+        dialog.setOnShowListener(d -> {
+
+            Button saveButton =
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+            saveButton.setOnClickListener(v -> {
+
+                String name =
+                        nameInput.getText().toString().trim();
+
+                String description =
+                        descriptionInput.getText().toString().trim();
+
+                String ingredients =
+                        ingredientsInput.getText().toString().trim();
+
+                String time =
+                        timeInput.getText().toString().trim();
+
+                String difficulty =
+                        difficultyInput.getText().toString().trim();
+
+                String detailedIngredients =
+                        detailedIngredientsInput
+                                .getText()
+                                .toString()
+                                .trim();
+
+                String instructions =
+                        instructionsInput
+                                .getText()
+                                .toString()
+                                .trim();
+
+                if (name.isEmpty()) {
+                    nameInput.setError("Enter a recipe name");
+                    return;
+                }
+
+                if (ingredients.isEmpty()) {
+                    ingredientsInput.setError("Enter the ingredients");
+                    return;
+                }
+
+                recipe.name = name;
+                recipe.description = description;
+                recipe.ingredients = ingredients;
+                recipe.cookingTime = time;
+                recipe.difficulty = difficulty;
+                recipe.ingredientsDetailed = detailedIngredients;
+                recipe.instructions = instructions;
+
+                displayRecipes();
+
+                Toast.makeText(
+                        RecipesActivity.this,
+                        "Recipe updated",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                dialog.dismiss();
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void confirmDeleteRecipe(int position) {
+
+        Recipe recipe = recipes.get(position);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Recipe")
+                .setMessage(
+                        "Are you sure you want to delete \"" +
+                                recipe.name +
+                                "\"?"
+                )
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton(
+                        "Delete",
+                        (dialog, which) -> {
+
+                            recipes.remove(position);
+                            displayRecipes();
+
+                            Toast.makeText(
+                                    RecipesActivity.this,
+                                    "Recipe deleted",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                )
+                .show();
+    }
+
+    private LinearLayout createRecipeInputLayout() {
+
+        LinearLayout layout = new LinearLayout(this);
+
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 10, 40, 10);
+
+        EditText name =
+                createInput("Recipe name");
+
+        EditText description =
+                createInput("Description");
+
+        EditText ingredients =
+                createInput("Ingredients");
+
+        EditText time =
+                createInput("Cooking time");
+
+        EditText difficulty =
+                createInput("Difficulty");
+
+        EditText detailedIngredients =
+                createInput("Detailed ingredients");
+
+        EditText instructions =
+                createInput("Instructions");
+
+        layout.addView(name);
+        layout.addView(description);
+        layout.addView(ingredients);
+        layout.addView(time);
+        layout.addView(difficulty);
+        layout.addView(detailedIngredients);
+        layout.addView(instructions);
+
+        return layout;
+    }
+
+    private EditText createInput(String hint) {
+
+        EditText editText = new EditText(this);
+
+        editText.setHint(hint);
+        editText.setTextSize(16);
+        editText.setPadding(0, 12, 0, 12);
+
+        editText.setLayoutParams(
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+        );
+
+        return editText;
+    }
+
+    public static class Recipe {
+
+        String name;
+        String description;
+        String ingredients;
+        String cookingTime;
+        String difficulty;
+        String ingredientsDetailed;
+        String instructions;
+
+        Recipe(
+                String name,
+                String description,
+                String ingredients,
+                String cookingTime,
+                String difficulty,
+                String ingredientsDetailed,
+                String instructions
+        ) {
+            this.name = name;
+            this.description = description;
+            this.ingredients = ingredients;
+            this.cookingTime = cookingTime;
+            this.difficulty = difficulty;
+            this.ingredientsDetailed = ingredientsDetailed;
+            this.instructions = instructions;
+        }
     }
 }

@@ -17,45 +17,23 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Smart Pantry"
-                    android:textColor="#111111"
-                    android:textSize="40sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Keep your food organised"
-                    android:textColor="#777777"
-                    android:textSize="20sp" />
-
-            </LinearLayout>
-
-            <!-- LIGHT / DARK MODE BUTTON -->
             <TextView
-                android:id="@+id/btnTheme"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:gravity="center"
-                android:background="#C7A5F0"
-                android:text="☾"
-                android:textColor="#38216D"
-                android:textSize="32sp"
-                android:clickable="true"
-                android:focusable="true" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Smart Pantry"
+                android:textColor="#111111"
+                android:textSize="40sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Keep your food organised"
+                android:textColor="#777777"
+                android:textSize="20sp" />
 
         </LinearLayout>
 
@@ -113,9 +91,9 @@
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:backgroundTint="#C7A5F0"
+                android:backgroundTint="#4CAF50"
                 android:text="All"
-                android:textColor="#38216D"
+                android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -129,9 +107,9 @@
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:backgroundTint="#C7A5F0"
+                android:backgroundTint="#81C784"
                 android:text="Fresh"
-                android:textColor="#38216D"
+                android:textColor="#1B5E20"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -150,9 +128,9 @@
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:backgroundTint="#C7A5F0"
+                android:backgroundTint="#81C784"
                 android:text="Dry Goods"
-                android:textColor="#38216D"
+                android:textColor="#1B5E20"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -166,9 +144,9 @@
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_weight="1"
-                android:backgroundTint="#C7A5F0"
+                android:backgroundTint="#81C784"
                 android:text="Dairy"
-                android:textColor="#38216D"
+                android:textColor="#1B5E20"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -180,9 +158,9 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="#C7A5F0"
+            android:backgroundTint="#388E3C"
             android:text="🍳  Recipes"
-            android:textColor="#38216D"
+            android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -238,9 +216,9 @@
             android:layout_height="64dp"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="20dp"
-            android:backgroundTint="#C7A5F0"
+            android:backgroundTint="#4CAF50"
             android:text="+  Add Ingredient"
-            android:textColor="#38216D"
+            android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
 

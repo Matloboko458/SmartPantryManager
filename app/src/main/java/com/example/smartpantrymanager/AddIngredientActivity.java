@@ -11,14 +11,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class AddIngredientActivity extends AppCompatActivity {
 
-    private EditText editIngredientName;
-    private EditText editQuantity;
-    private EditText editUnit;
-    private EditText editExpiryDate;
+    private EditText edtIngredientName;
+    private EditText edtQuantity;
+    private EditText edtUnit;
+    private EditText edtExpiryDate;
 
     private Button btnSaveIngredient;
 
     private DatabaseHelper databaseHelper;
+
+    private boolean isFormattingDate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,94 +28,71 @@ public class AddIngredientActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_add_ingredient);
 
-        editIngredientName =
-                findViewById(R.id.editIngredientName);
+        edtIngredientName = findViewById(R.id.edtIngredientName);
+        edtQuantity = findViewById(R.id.edtQuantity);
+        edtUnit = findViewById(R.id.edtUnit);
+        edtExpiryDate = findViewById(R.id.edtExpiryDate);
+        btnSaveIngredient = findViewById(R.id.btnSaveIngredient);
 
-        editQuantity =
-                findViewById(R.id.editQuantity);
+        databaseHelper = new DatabaseHelper(this);
 
-        editUnit =
-                findViewById(R.id.editUnit);
+        edtExpiryDate.addTextChangedListener(new TextWatcher() {
 
-        editExpiryDate =
-                findViewById(R.id.editExpiryDate);
+            @Override
+            public void beforeTextChanged(
+                    CharSequence s,
+                    int start,
+                    int count,
+                    int after
+            ) {
+            }
 
-        btnSaveIngredient =
-                findViewById(R.id.btnSaveIngredient);
+            @Override
+            public void onTextChanged(
+                    CharSequence s,
+                    int start,
+                    int before,
+                    int count
+            ) {
+            }
 
-        databaseHelper =
-                new DatabaseHelper(this);
+            @Override
+            public void afterTextChanged(Editable s) {
 
-        editExpiryDate.addTextChangedListener(
-                new TextWatcher() {
-
-                    private boolean isFormatting = false;
-
-                    @Override
-                    public void beforeTextChanged(
-                            CharSequence s,
-                            int start,
-                            int count,
-                            int after
-                    ) {
-                    }
-
-                    @Override
-                    public void onTextChanged(
-                            CharSequence s,
-                            int start,
-                            int before,
-                            int count
-                    ) {
-                    }
-
-                    @Override
-                    public void afterTextChanged(
-                            Editable editable
-                    ) {
-
-                        if (isFormatting) {
-                            return;
-                        }
-
-                        isFormatting = true;
-
-                        String digits =
-                                editable.toString()
-                                        .replace("/", "")
-                                        .replace(" ", "");
-
-                        if (digits.length() > 8) {
-                            digits =
-                                    digits.substring(0, 8);
-                        }
-
-                        StringBuilder formattedDate =
-                                new StringBuilder();
-
-                        for (int i = 0;
-                             i < digits.length();
-                             i++) {
-
-                            if (i == 2 || i == 4) {
-                                formattedDate.append("/");
-                            }
-
-                            formattedDate.append(
-                                    digits.charAt(i)
-                            );
-                        }
-
-                        editable.replace(
-                                0,
-                                editable.length(),
-                                formattedDate.toString()
-                        );
-
-                        isFormatting = false;
-                    }
+                if (isFormattingDate) {
+                    return;
                 }
-        );
+
+                isFormattingDate = true;
+
+                String digits = s.toString()
+                        .replace("/", "")
+                        .replaceAll("[^0-9]", "");
+
+                if (digits.length() > 8) {
+                    digits = digits.substring(0, 8);
+                }
+
+                StringBuilder formatted = new StringBuilder();
+
+                for (int i = 0; i < digits.length(); i++) {
+
+                    if (i == 2 || i == 4) {
+                        formatted.append("/");
+                    }
+
+                    formatted.append(digits.charAt(i));
+                }
+
+                edtExpiryDate.setText(formatted.toString());
+
+                edtExpiryDate.setSelection(
+                        edtExpiryDate.length()
+                );
+
+                isFormattingDate = false;
+            }
+        });
 
         btnSaveIngredient.setOnClickListener(
                 view -> saveIngredient()
@@ -123,26 +102,22 @@ public class AddIngredientActivity extends AppCompatActivity {
     private void saveIngredient() {
 
         String ingredientName =
-                editIngredientName
-                        .getText()
+                edtIngredientName.getText()
                         .toString()
                         .trim();
 
         String quantity =
-                editQuantity
-                        .getText()
+                edtQuantity.getText()
                         .toString()
                         .trim();
 
         String unit =
-                editUnit
-                        .getText()
+                edtUnit.getText()
                         .toString()
                         .trim();
 
         String expiryDate =
-                editExpiryDate
-                        .getText()
+                edtExpiryDate.getText()
                         .toString()
                         .trim();
 
@@ -160,27 +135,42 @@ public class AddIngredientActivity extends AppCompatActivity {
             return;
         }
 
-        String digitsOnly =
-                expiryDate.replace("/", "");
-
-        if (digitsOnly.length() != 8) {
+        if (!expiryDate.matches("\\d{2}/\\d{2}/\\d{4}")) {
 
             Toast.makeText(
                     AddIngredientActivity.this,
-                    "Enter the expiry date as DDMMYYYY.",
+                    "Enter the expiry date as DD/MM/YYYY.",
                     Toast.LENGTH_SHORT
             ).show();
 
             return;
         }
 
-        long result =
-                databaseHelper.addIngredient(
-                        ingredientName,
-                        quantity,
-                        unit,
-                        expiryDate
-                );
+        String[] dateParts = expiryDate.split("/");
+
+        int day = Integer.parseInt(dateParts[0]);
+        int month = Integer.parseInt(dateParts[1]);
+        int year = Integer.parseInt(dateParts[2]);
+
+        if (day < 1 || day > 31
+                || month < 1 || month > 12
+                || year < 1) {
+
+            Toast.makeText(
+                    AddIngredientActivity.this,
+                    "Please enter a valid expiry date.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            return;
+        }
+
+        long result = databaseHelper.addIngredient(
+                ingredientName,
+                quantity,
+                unit,
+                expiryDate
+        );
 
         if (result != -1) {
 

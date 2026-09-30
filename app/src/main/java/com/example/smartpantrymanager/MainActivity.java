@@ -1,12 +1,13 @@
 package com.example.smartpantrymanager;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,9 +18,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    private DatabaseHelper databaseHelper;
+
     private EditText searchPantry;
+
     private TextView txtItemCount;
-    private TextView btnTheme;
+    private TextView txtEmptyTitle;
+    private TextView txtEmptyMessage;
+
+    private LinearLayout ingredientContainer;
+    private LinearLayout emptyState;
 
     private Button btnAll;
     private Button btnFresh;
@@ -28,13 +36,14 @@ public class MainActivity extends AppCompatActivity {
     private Button btnRecipes;
     private Button btnAddIngredient;
 
-    private LinearLayout ingredientContainer;
-    private LinearLayout emptyState;
-
-    private DatabaseHelper databaseHelper;
-
     private String currentCategory = "All";
     private String currentSearch = "";
+
+    // Green theme colours
+    private final int GREEN_DARK = Color.rgb(56, 142, 60);
+    private final int GREEN = Color.rgb(76, 175, 80);
+    private final int GREEN_LIGHT = Color.rgb(129, 199, 132);
+    private final int DARK_GREEN_TEXT = Color.rgb(27, 94, 32);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,70 +51,51 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        // ---------------------------------------------------------
-        // CONNECT VIEWS
-        // ---------------------------------------------------------
-
-        searchPantry = findViewById(R.id.searchPantry);
-        txtItemCount = findViewById(R.id.txtItemCount);
-        btnTheme = findViewById(R.id.btnTheme);
-
-        btnAll = findViewById(R.id.btnAll);
-        btnFresh = findViewById(R.id.btnFresh);
-        btnDryGoods = findViewById(R.id.btnDryGoods);
-        btnDairy = findViewById(R.id.btnDairy);
-        btnRecipes = findViewById(R.id.btnRecipes);
-        btnAddIngredient = findViewById(R.id.btnAddIngredient);
-
-        ingredientContainer = findViewById(R.id.ingredientContainer);
-        emptyState = findViewById(R.id.emptyState);
-
-        // ---------------------------------------------------------
+        // =========================================================
         // DATABASE
-        // ---------------------------------------------------------
+        // =========================================================
 
         databaseHelper = new DatabaseHelper(this);
 
-        // ---------------------------------------------------------
-        // LOAD INGREDIENTS
-        // ---------------------------------------------------------
+        // =========================================================
+        // CONNECT XML VIEWS
+        // =========================================================
 
-        loadIngredients();
+        searchPantry = findViewById(R.id.searchPantry);
 
-        // ---------------------------------------------------------
-        // SEARCH
-        // ---------------------------------------------------------
+        txtItemCount = findViewById(R.id.txtItemCount);
 
-        searchPantry.addTextChangedListener(new TextWatcher() {
+        txtEmptyTitle = findViewById(R.id.txtEmptyTitle);
 
-            @Override
-            public void beforeTextChanged(
-                    CharSequence s,
-                    int start,
-                    int count,
-                    int after
-            ) {
-            }
+        txtEmptyMessage = findViewById(R.id.txtEmptyMessage);
 
-            @Override
-            public void onTextChanged(
-                    CharSequence s,
-                    int start,
-                    int before,
-                    int count
-            ) {
-                currentSearch = s.toString().trim();
-                loadIngredients();
-            }
+        ingredientContainer =
+                findViewById(R.id.ingredientContainer);
 
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
+        emptyState =
+                findViewById(R.id.emptyState);
 
-        // ---------------------------------------------------------
-        // ALL BUTTON
-        // ---------------------------------------------------------
+        btnAll =
+                findViewById(R.id.btnAll);
+
+        btnFresh =
+                findViewById(R.id.btnFresh);
+
+        btnDryGoods =
+                findViewById(R.id.btnDryGoods);
+
+        btnDairy =
+                findViewById(R.id.btnDairy);
+
+        btnRecipes =
+                findViewById(R.id.btnRecipes);
+
+        btnAddIngredient =
+                findViewById(R.id.btnAddIngredient);
+
+        // =========================================================
+        // CATEGORY BUTTONS
+        // =========================================================
 
         btnAll.setOnClickListener(view -> {
 
@@ -116,10 +106,6 @@ public class MainActivity extends AppCompatActivity {
             loadIngredients();
         });
 
-        // ---------------------------------------------------------
-        // FRESH BUTTON
-        // ---------------------------------------------------------
-
         btnFresh.setOnClickListener(view -> {
 
             currentCategory = "Fresh";
@@ -128,10 +114,6 @@ public class MainActivity extends AppCompatActivity {
 
             loadIngredients();
         });
-
-        // ---------------------------------------------------------
-        // DRY GOODS BUTTON
-        // ---------------------------------------------------------
 
         btnDryGoods.setOnClickListener(view -> {
 
@@ -142,10 +124,6 @@ public class MainActivity extends AppCompatActivity {
             loadIngredients();
         });
 
-        // ---------------------------------------------------------
-        // DAIRY BUTTON
-        // ---------------------------------------------------------
-
         btnDairy.setOnClickListener(view -> {
 
             currentCategory = "Dairy";
@@ -155,9 +133,9 @@ public class MainActivity extends AppCompatActivity {
             loadIngredients();
         });
 
-        // ---------------------------------------------------------
+        // =========================================================
         // RECIPES BUTTON
-        // ---------------------------------------------------------
+        // =========================================================
 
         btnRecipes.setOnClickListener(view -> {
 
@@ -169,9 +147,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // ---------------------------------------------------------
+        // =========================================================
         // ADD INGREDIENT BUTTON
-        // ---------------------------------------------------------
+        // =========================================================
 
         btnAddIngredient.setOnClickListener(view -> {
 
@@ -183,138 +161,151 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // ---------------------------------------------------------
-        // THEME BUTTON
-        // ---------------------------------------------------------
+        // =========================================================
+        // SEARCH
+        // =========================================================
 
-        btnTheme.setOnClickListener(view -> {
+        searchPantry.addTextChangedListener(
+                new TextWatcher() {
 
-            if (btnTheme.getText().toString().equals("☾")) {
+                    @Override
+                    public void beforeTextChanged(
+                            CharSequence s,
+                            int start,
+                            int count,
+                            int after
+                    ) {
+                    }
 
-                btnTheme.setText("☀");
+                    @Override
+                    public void onTextChanged(
+                            CharSequence s,
+                            int start,
+                            int before,
+                            int count
+                    ) {
 
-                getWindow().getDecorView().setBackgroundColor(
-                        Color.rgb(30, 30, 30)
-                );
+                        currentSearch =
+                                s.toString().trim();
 
-            } else {
+                        loadIngredients();
+                    }
 
-                btnTheme.setText("☾");
+                    @Override
+                    public void afterTextChanged(
+                            Editable s
+                    ) {
+                    }
+                }
+        );
 
-                getWindow().getDecorView().setBackgroundColor(
-                        Color.rgb(248, 250, 250)
-                );
-            }
-        });
-
-        // ---------------------------------------------------------
+        // =========================================================
         // INITIAL BUTTON STYLE
-        // ---------------------------------------------------------
+        // =========================================================
 
         updateCategoryButtons();
+
+        // =========================================================
+        // LOAD PANTRY
+        // =========================================================
+
+        loadIngredients();
     }
 
     // =============================================================
-    // RELOAD WHEN RETURNING FROM ADD INGREDIENT SCREEN
+    // RELOAD WHEN RETURNING TO MAIN SCREEN
     // =============================================================
 
     @Override
     protected void onResume() {
+
         super.onResume();
 
         if (databaseHelper != null) {
+
             loadIngredients();
         }
     }
 
     // =============================================================
-    // LOAD INGREDIENTS FROM DATABASE
+    // LOAD INGREDIENTS
     // =============================================================
 
     private void loadIngredients() {
 
-        if (databaseHelper == null) {
+        if (ingredientContainer == null ||
+                databaseHelper == null) {
+
             return;
         }
 
         ingredientContainer.removeAllViews();
 
-        int numberOfItems = 0;
-
         Cursor cursor = null;
+
+        int visibleCount = 0;
 
         try {
 
-            cursor = databaseHelper.getAllIngredients();
+            cursor =
+                    databaseHelper.getAllIngredients();
 
-            if (cursor != null) {
+            if (cursor != null &&
+                    cursor.moveToFirst()) {
 
-                while (cursor.moveToNext()) {
+                do {
 
-                    String name = "";
-                    String quantity = "";
-                    String unit = "";
-                    String expiryDate = "";
+                    String name =
+                            getColumnValue(
+                                    cursor,
+                                    DatabaseHelper.COLUMN_NAME
+                            );
 
-                    // -------------------------------------------------
-                    // READ DATABASE COLUMNS SAFELY
-                    // -------------------------------------------------
+                    String quantity =
+                            getColumnValue(
+                                    cursor,
+                                    DatabaseHelper.COLUMN_QUANTITY
+                            );
 
-                    int nameIndex = cursor.getColumnIndex("name");
+                    String unit =
+                            getColumnValue(
+                                    cursor,
+                                    DatabaseHelper.COLUMN_UNIT
+                            );
 
-                    if (nameIndex >= 0) {
-                        name = cursor.getString(nameIndex);
-                    }
+                    String expiryDate =
+                            getColumnValue(
+                                    cursor,
+                                    DatabaseHelper.COLUMN_EXPIRY_DATE
+                            );
 
-                    int quantityIndex = cursor.getColumnIndex("quantity");
-
-                    if (quantityIndex >= 0) {
-                        quantity = cursor.getString(quantityIndex);
-                    }
-
-                    int unitIndex = cursor.getColumnIndex("unit");
-
-                    if (unitIndex >= 0) {
-                        unit = cursor.getString(unitIndex);
-                    }
-
-                    int expiryIndex = cursor.getColumnIndex("expiry_date");
-
-                    if (expiryIndex >= 0) {
-                        expiryDate = cursor.getString(expiryIndex);
-                    }
-
-                    // -------------------------------------------------
-                    // SEARCH FILTER
-                    // -------------------------------------------------
-
+                    // Search filter
                     if (!currentSearch.isEmpty()) {
 
                         String searchableText =
-                                name + " "
-                                        + quantity + " "
-                                        + unit + " "
-                                        + expiryDate;
+                                (
+                                        name + " "
+                                                + quantity + " "
+                                                + unit + " "
+                                                + expiryDate
+                                ).toLowerCase();
 
-                        if (!searchableText
-                                .toLowerCase()
-                                .contains(currentSearch.toLowerCase())) {
+                        if (!searchableText.contains(
+                                currentSearch.toLowerCase()
+                        )) {
 
                             continue;
                         }
                     }
 
-                    // -------------------------------------------------
-                    // CATEGORY FILTER
-                    // -------------------------------------------------
+                    // Category filter
+                    if (!matchesCategory(
+                            name,
+                            unit
+                    )) {
 
-                    if (!matchesCategory(name, unit)) {
                         continue;
                     }
-
-                    // -------------------------------------------------
-                    // DISPLAY INGREDIENT
-                    // -------------------------------------------------
 
                     addIngredientToScreen(
                             name,
@@ -323,8 +314,9 @@ public class MainActivity extends AppCompatActivity {
                             expiryDate
                     );
 
-                    numberOfItems++;
-                }
+                    visibleCount++;
+
+                } while (cursor.moveToNext());
             }
 
         } catch (Exception e) {
@@ -334,35 +326,101 @@ public class MainActivity extends AppCompatActivity {
         } finally {
 
             if (cursor != null) {
+
                 cursor.close();
             }
         }
 
-        // ---------------------------------------------------------
+        // =========================================================
         // UPDATE ITEM COUNT
-        // ---------------------------------------------------------
+        // =========================================================
 
-        if (numberOfItems == 1) {
+        if (visibleCount == 1) {
 
-            txtItemCount.setText("1 item");
+            txtItemCount.setText(
+                    "1 item"
+            );
 
         } else {
 
-            txtItemCount.setText(numberOfItems + " items");
+            txtItemCount.setText(
+                    visibleCount + " items"
+            );
         }
 
-        // ---------------------------------------------------------
+        // =========================================================
         // EMPTY STATE
-        // ---------------------------------------------------------
+        // =========================================================
 
-        if (numberOfItems == 0) {
+        if (visibleCount == 0) {
 
-            emptyState.setVisibility(View.VISIBLE);
+            ingredientContainer.setVisibility(
+                    View.GONE
+            );
+
+            emptyState.setVisibility(
+                    View.VISIBLE
+            );
+
+            if (currentSearch.isEmpty()) {
+
+                txtEmptyTitle.setText(
+                        "Your pantry is empty"
+                );
+
+                txtEmptyMessage.setText(
+                        "Add your first ingredient to start managing your pantry."
+                );
+
+            } else {
+
+                txtEmptyTitle.setText(
+                        "No ingredients found"
+                );
+
+                txtEmptyMessage.setText(
+                        "Try another search."
+                );
+            }
 
         } else {
 
-            emptyState.setVisibility(View.GONE);
+            ingredientContainer.setVisibility(
+                    View.VISIBLE
+            );
+
+            emptyState.setVisibility(
+                    View.GONE
+            );
         }
+    }
+
+    // =============================================================
+    // GET DATABASE COLUMN SAFELY
+    // =============================================================
+
+    private String getColumnValue(
+            Cursor cursor,
+            String columnName
+    ) {
+
+        int columnIndex =
+                cursor.getColumnIndex(columnName);
+
+        if (columnIndex == -1) {
+
+            return "";
+        }
+
+        String value =
+                cursor.getString(columnIndex);
+
+        if (value == null) {
+
+            return "";
+        }
+
+        return value;
     }
 
     // =============================================================
@@ -375,78 +433,76 @@ public class MainActivity extends AppCompatActivity {
     ) {
 
         if (currentCategory.equals("All")) {
+
             return true;
         }
 
-        String ingredientName =
-                name == null
-                        ? ""
-                        : name.toLowerCase();
+        String ingredient =
+                name.toLowerCase().trim();
 
         String ingredientUnit =
-                unit == null
-                        ? ""
-                        : unit.toLowerCase();
+                unit.toLowerCase().trim();
 
-        // ---------------------------------------------------------
+        // =========================================================
         // FRESH
-        // ---------------------------------------------------------
+        // =========================================================
 
         if (currentCategory.equals("Fresh")) {
 
-            return ingredientName.contains("fruit")
-                    || ingredientName.contains("apple")
-                    || ingredientName.contains("banana")
-                    || ingredientName.contains("orange")
-                    || ingredientName.contains("tomato")
-                    || ingredientName.contains("lettuce")
-                    || ingredientName.contains("spinach")
-                    || ingredientName.contains("carrot")
-                    || ingredientName.contains("potato")
-                    || ingredientName.contains("vegetable")
-                    || ingredientName.contains("chicken")
-                    || ingredientName.contains("meat")
-                    || ingredientName.contains("fish");
+            return ingredient.contains("apple")
+                    || ingredient.contains("banana")
+                    || ingredient.contains("orange")
+                    || ingredient.contains("tomato")
+                    || ingredient.contains("lettuce")
+                    || ingredient.contains("spinach")
+                    || ingredient.contains("carrot")
+                    || ingredient.contains("potato")
+                    || ingredient.contains("vegetable")
+                    || ingredient.contains("chicken")
+                    || ingredient.contains("beef")
+                    || ingredient.contains("meat")
+                    || ingredient.contains("fish")
+                    || ingredient.contains("fruit");
         }
 
-        // ---------------------------------------------------------
+        // =========================================================
         // DAIRY
-        // ---------------------------------------------------------
+        // =========================================================
 
         if (currentCategory.equals("Dairy")) {
 
-            return ingredientName.contains("milk")
-                    || ingredientName.contains("cheese")
-                    || ingredientName.contains("yogurt")
-                    || ingredientName.contains("yoghurt")
-                    || ingredientName.contains("butter")
-                    || ingredientName.contains("cream")
-                    || ingredientName.contains("cheddar")
-                    || ingredientName.contains("custard");
+            return ingredient.contains("milk")
+                    || ingredient.contains("cheese")
+                    || ingredient.contains("yogurt")
+                    || ingredient.contains("yoghurt")
+                    || ingredient.contains("butter")
+                    || ingredient.contains("cream")
+                    || ingredient.contains("custard")
+                    || ingredient.contains("cheddar");
         }
 
-        // ---------------------------------------------------------
+        // =========================================================
         // DRY GOODS
-        // ---------------------------------------------------------
+        // =========================================================
 
         if (currentCategory.equals("Dry Goods")) {
 
-            return ingredientName.contains("rice")
-                    || ingredientName.contains("pasta")
-                    || ingredientName.contains("flour")
-                    || ingredientName.contains("sugar")
-                    || ingredientName.contains("salt")
-                    || ingredientName.contains("cereal")
-                    || ingredientName.contains("beans")
-                    || ingredientName.contains("lentils")
-                    || ingredientName.contains("bread")
-                    || ingredientName.contains("water")
-                    || ingredientName.contains("coffee")
-                    || ingredientName.contains("tea")
-                    || ingredientName.contains("spice")
-                    || ingredientName.contains("oil")
-                    || ingredientName.contains("can")
-                    || ingredientName.contains("tin")
+            return ingredient.contains("rice")
+                    || ingredient.contains("pasta")
+                    || ingredient.contains("flour")
+                    || ingredient.contains("sugar")
+                    || ingredient.contains("salt")
+                    || ingredient.contains("cereal")
+                    || ingredient.contains("beans")
+                    || ingredient.contains("lentils")
+                    || ingredient.contains("bread")
+                    || ingredient.contains("coffee")
+                    || ingredient.contains("tea")
+                    || ingredient.contains("spice")
+                    || ingredient.contains("oil")
+                    || ingredient.contains("tuna")
+                    || ingredient.contains("can")
+                    || ingredient.contains("tin")
                     || ingredientUnit.contains("kg")
                     || ingredientUnit.contains("g");
         }
@@ -455,7 +511,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // =============================================================
-    // ADD INGREDIENT TO SCREEN
+    // DISPLAY INGREDIENT
     // =============================================================
 
     private void addIngredientToScreen(
@@ -465,99 +521,101 @@ public class MainActivity extends AppCompatActivity {
             String expiryDate
     ) {
 
-        LinearLayout itemLayout =
+        LinearLayout card =
                 new LinearLayout(this);
 
-        itemLayout.setOrientation(
+        card.setOrientation(
                 LinearLayout.VERTICAL
         );
 
-        itemLayout.setPadding(
-                16,
-                12,
-                16,
-                18
+        card.setPadding(
+                24,
+                20,
+                24,
+                20
         );
 
-        LinearLayout.LayoutParams itemParams =
+        LinearLayout.LayoutParams cardParams =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        itemParams.setMargins(
+        cardParams.setMargins(
                 0,
-                4,
                 0,
-                8
+                0,
+                20
         );
 
-        itemLayout.setLayoutParams(itemParams);
+        card.setLayoutParams(
+                cardParams
+        );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // INGREDIENT NAME
-        // ---------------------------------------------------------
+        // =========================================================
 
         TextView nameText =
                 new TextView(this);
 
-        nameText.setText(name);
-
-        nameText.setTextColor(
-                Color.BLACK
+        nameText.setText(
+                name
         );
 
-        nameText.setTextSize(22);
+        nameText.setTextSize(
+                22
+        );
 
-        nameText.setGravity(
-                Gravity.START
+        nameText.setTextColor(
+                Color.rgb(
+                        17,
+                        17,
+                        17
+                )
         );
 
         nameText.setTypeface(
                 null,
-                android.graphics.Typeface.BOLD
+                Typeface.BOLD
         );
 
-        itemLayout.addView(nameText);
-
-        // ---------------------------------------------------------
+        // =========================================================
         // QUANTITY
-        // ---------------------------------------------------------
+        // =========================================================
 
         TextView quantityText =
                 new TextView(this);
 
-        String quantityDisplay =
+        quantityText.setText(
                 "Quantity: "
                         + quantity
-                        + (unit.isEmpty()
-                        ? ""
-                        : " " + unit);
+                        + " "
+                        + unit
+        );
 
-        quantityText.setText(
-                quantityDisplay
+        quantityText.setTextSize(
+                18
         );
 
         quantityText.setTextColor(
-                Color.rgb(170, 170, 170)
+                Color.rgb(
+                        100,
+                        100,
+                        100
+                )
         );
-
-        quantityText.setTextSize(18);
 
         quantityText.setPadding(
                 0,
-                4,
+                6,
                 0,
                 0
         );
 
-        itemLayout.addView(
-                quantityText
-        );
-
-        // ---------------------------------------------------------
+        // =========================================================
         // EXPIRY DATE
-        // ---------------------------------------------------------
+        // =========================================================
 
         TextView expiryText =
                 new TextView(this);
@@ -567,138 +625,196 @@ public class MainActivity extends AppCompatActivity {
                         + expiryDate
         );
 
-        expiryText.setTextColor(
-                Color.rgb(170, 170, 170)
+        expiryText.setTextSize(
+                18
         );
 
-        expiryText.setTextSize(18);
+        expiryText.setTextColor(
+                Color.rgb(
+                        100,
+                        100,
+                        100
+                )
+        );
 
         expiryText.setPadding(
                 0,
-                4,
+                6,
                 0,
                 0
         );
 
-        itemLayout.addView(
+        // =========================================================
+        // ADD TO CARD
+        // =========================================================
+
+        card.addView(
+                nameText
+        );
+
+        card.addView(
+                quantityText
+        );
+
+        card.addView(
                 expiryText
         );
 
-        // ---------------------------------------------------------
-        // ADD TO LIST
-        // ---------------------------------------------------------
-
         ingredientContainer.addView(
-                itemLayout
+                card
         );
     }
 
     // =============================================================
-    // CATEGORY BUTTON APPEARANCE
+    // CATEGORY BUTTON COLOURS
     // =============================================================
 
     private void updateCategoryButtons() {
 
-        int selectedColor =
-                Color.rgb(199, 165, 240);
+        if (btnAll == null ||
+                btnFresh == null ||
+                btnDryGoods == null ||
+                btnDairy == null) {
 
-        int normalColor =
-                Color.rgb(225, 210, 245);
+            return;
+        }
 
-        int textColor =
-                Color.rgb(56, 33, 109);
-
-        // ---------------------------------------------------------
         // ALL
-        // ---------------------------------------------------------
 
         if (currentCategory.equals("All")) {
 
             btnAll.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            selectedColor
+                    ColorStateList.valueOf(
+                            GREEN_DARK
                     )
+            );
+
+            btnAll.setTextColor(
+                    Color.WHITE
             );
 
         } else {
 
             btnAll.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            normalColor
+                    ColorStateList.valueOf(
+                            GREEN_LIGHT
                     )
+            );
+
+            btnAll.setTextColor(
+                    DARK_GREEN_TEXT
             );
         }
 
-        // ---------------------------------------------------------
         // FRESH
-        // ---------------------------------------------------------
 
         if (currentCategory.equals("Fresh")) {
 
             btnFresh.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            selectedColor
+                    ColorStateList.valueOf(
+                            GREEN_DARK
                     )
+            );
+
+            btnFresh.setTextColor(
+                    Color.WHITE
             );
 
         } else {
 
             btnFresh.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            normalColor
+                    ColorStateList.valueOf(
+                            GREEN_LIGHT
                     )
+            );
+
+            btnFresh.setTextColor(
+                    DARK_GREEN_TEXT
             );
         }
 
-        // ---------------------------------------------------------
         // DRY GOODS
-        // ---------------------------------------------------------
 
         if (currentCategory.equals("Dry Goods")) {
 
             btnDryGoods.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            selectedColor
+                    ColorStateList.valueOf(
+                            GREEN_DARK
                     )
+            );
+
+            btnDryGoods.setTextColor(
+                    Color.WHITE
             );
 
         } else {
 
             btnDryGoods.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            normalColor
+                    ColorStateList.valueOf(
+                            GREEN_LIGHT
                     )
+            );
+
+            btnDryGoods.setTextColor(
+                    DARK_GREEN_TEXT
             );
         }
 
-        // ---------------------------------------------------------
         // DAIRY
-        // ---------------------------------------------------------
 
         if (currentCategory.equals("Dairy")) {
 
             btnDairy.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            selectedColor
+                    ColorStateList.valueOf(
+                            GREEN_DARK
                     )
+            );
+
+            btnDairy.setTextColor(
+                    Color.WHITE
             );
 
         } else {
 
             btnDairy.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            normalColor
+                    ColorStateList.valueOf(
+                            GREEN_LIGHT
                     )
+            );
+
+            btnDairy.setTextColor(
+                    DARK_GREEN_TEXT
             );
         }
 
-        // ---------------------------------------------------------
-        // TEXT COLOUR
-        // ---------------------------------------------------------
+        // RECIPES
 
-        btnAll.setTextColor(textColor);
-        btnFresh.setTextColor(textColor);
-        btnDryGoods.setTextColor(textColor);
-        btnDairy.setTextColor(textColor);
+        if (btnRecipes != null) {
+
+            btnRecipes.setBackgroundTintList(
+                    ColorStateList.valueOf(
+                            GREEN_DARK
+                    )
+            );
+
+            btnRecipes.setTextColor(
+                    Color.WHITE
+            );
+        }
+
+        // ADD INGREDIENT
+
+        if (btnAddIngredient != null) {
+
+            btnAddIngredient.setBackgroundTintList(
+                    ColorStateList.valueOf(
+                            GREEN
+                    )
+            );
+
+            btnAddIngredient.setTextColor(
+                    Color.WHITE
+            );
+        }
     }
 }
