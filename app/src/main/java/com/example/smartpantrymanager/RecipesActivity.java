@@ -36,6 +36,7 @@ public class RecipesActivity extends AppCompatActivity {
     private LinearLayout recipeContainer;
     private DatabaseHelper databaseHelper;
     private Spinner recipeFilterSpinner;
+    private TextView txtSectionTitle;
     private String currentRecipeFilter = "Suggested Recipes";
 
     private final List<PantryItem> pantryItems = new ArrayList<>();
@@ -53,6 +54,7 @@ public class RecipesActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
 
         recipeContainer = findViewById(R.id.recipeContainer);
+        txtSectionTitle = findViewById(R.id.txtSectionTitle);
 
         Button btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(view -> finish());
@@ -651,6 +653,14 @@ public class RecipesActivity extends AppCompatActivity {
     }
 
     private void loadRecipes() {
+        if (txtSectionTitle != null) {
+            if (currentRecipeFilter != null && currentRecipeFilter.contains("All")) {
+                txtSectionTitle.setText("Recipes");
+            } else {
+                txtSectionTitle.setText("Suggested Recipes");
+            }
+        }
+
         loadPantryIngredients();
 
         if (recipeContainer == null) {
