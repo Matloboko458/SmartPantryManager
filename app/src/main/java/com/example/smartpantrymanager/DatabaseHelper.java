@@ -130,7 +130,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.update(
                 TABLE_INGREDIENTS,
                 values,
-                COLUMN_ID + "=?",
+                COLUMN_ID + " = ?",
                 new String[]{String.valueOf(id)}
         );
     }
@@ -141,7 +141,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return db.delete(
                 TABLE_INGREDIENTS,
-                COLUMN_ID + "=?",
+                COLUMN_ID + " = ?",
                 new String[]{String.valueOf(id)}
         );
     }

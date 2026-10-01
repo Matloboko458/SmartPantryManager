@@ -1,14 +1,18 @@
 package com.example.smartpantrymanager;
 
-import android.content.DialogInterface;
+import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,21 +20,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
 
-    private EditText searchPantry;
-
-    private TextView txtItemCount;
-    private TextView txtEmptyTitle;
-    private TextView txtEmptyMessage;
-
     private LinearLayout ingredientContainer;
     private LinearLayout emptyState;
+    private TextView txtItemCount;
+    private EditText searchPantry;
 
     private Button btnAll;
     private Button btnFresh;
@@ -39,13 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnRecipes;
     private Button btnAddIngredient;
 
-    private String currentCategory = "All";
-    private String currentSearch = "";
-
-    private final int GREEN_DARK = Color.rgb(56, 142, 60);
-    private final int GREEN = Color.rgb(76, 175, 80);
-    private final int GREEN_LIGHT = Color.rgb(129, 199, 132);
-    private final int DARK_GREEN_TEXT = Color.rgb(27, 94, 32);
+    private String currentFilter = "All";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,90 +48,58 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
+        ingredientContainer = findViewById(R.id.ingredientContainer);
+        emptyState = findViewById(R.id.emptyState);
+        txtItemCount = findViewById(R.id.txtItemCount);
         searchPantry = findViewById(R.id.searchPantry);
 
-        txtItemCount = findViewById(R.id.txtItemCount);
-
-        txtEmptyTitle = findViewById(R.id.txtEmptyTitle);
-
-        txtEmptyMessage = findViewById(R.id.txtEmptyMessage);
-
-        ingredientContainer =
-                findViewById(R.id.ingredientContainer);
-
-        emptyState =
-                findViewById(R.id.emptyState);
-
-        btnAll =
-                findViewById(R.id.btnAll);
-
-        btnFresh =
-                findViewById(R.id.btnFresh);
-
-        btnDryGoods =
-                findViewById(R.id.btnDryGoods);
-
-        btnDairy =
-                findViewById(R.id.btnDairy);
-
-        btnRecipes =
-                findViewById(R.id.btnRecipes);
-
-        btnAddIngredient =
-                findViewById(R.id.btnAddIngredient);
+        btnAll = findViewById(R.id.btnAll);
+        btnFresh = findViewById(R.id.btnFresh);
+        btnDryGoods = findViewById(R.id.btnDryGoods);
+        btnDairy = findViewById(R.id.btnDairy);
+        btnRecipes = findViewById(R.id.btnRecipes);
+        btnAddIngredient = findViewById(R.id.btnAddIngredient);
 
         btnAll.setOnClickListener(view -> {
-
-            currentCategory = "All";
-
+            currentFilter = "All";
             updateCategoryButtons();
-
             loadIngredients();
         });
 
         btnFresh.setOnClickListener(view -> {
-
-            currentCategory = "Fresh";
-
+            currentFilter = "Fresh";
             updateCategoryButtons();
-
             loadIngredients();
         });
 
         btnDryGoods.setOnClickListener(view -> {
-
-            currentCategory = "Dry Goods";
-
+            currentFilter = "Dry Goods";
             updateCategoryButtons();
-
             loadIngredients();
         });
 
         btnDairy.setOnClickListener(view -> {
-
-            currentCategory = "Dairy";
-
+            currentFilter = "Dairy";
             updateCategoryButtons();
-
             loadIngredients();
         });
 
-        btnRecipes.setOnClickListener(view -> {
-
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    RecipesActivity.class
-            );
+        btnAddIngredient.setOnClickListener(view -> {
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            AddIngredientActivity.class
+                    );
 
             startActivity(intent);
         });
 
-        btnAddIngredient.setOnClickListener(view -> {
-
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    AddIngredientActivity.class
-            );
+        btnRecipes.setOnClickListener(view -> {
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            RecipesActivity.class
+                    );
 
             startActivity(intent);
         });
@@ -162,10 +123,6 @@ public class MainActivity extends AppCompatActivity {
                             int before,
                             int count
                     ) {
-
-                        currentSearch =
-                                s.toString().trim();
-
                         loadIngredients();
                     }
 
@@ -178,339 +135,261 @@ public class MainActivity extends AppCompatActivity {
         );
 
         updateCategoryButtons();
-
         loadIngredients();
     }
 
     @Override
     protected void onResume() {
-
         super.onResume();
+        loadIngredients();
+    }
 
-        if (databaseHelper != null) {
-            loadIngredients();
-        }
+    private void updateCategoryButtons() {
+
+        int selectedColor = Color.rgb(
+                67,
+                160,
+                71
+        );
+
+        int normalColor = Color.rgb(
+                129,
+                199,
+                132
+        );
+
+        btnAll.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        currentFilter.equals("All")
+                                ? selectedColor
+                                : normalColor
+                )
+        );
+
+        btnFresh.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        currentFilter.equals("Fresh")
+                                ? selectedColor
+                                : normalColor
+                )
+        );
+
+        btnDryGoods.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        currentFilter.equals("Dry Goods")
+                                ? selectedColor
+                                : normalColor
+                )
+        );
+
+        btnDairy.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        currentFilter.equals("Dairy")
+                                ? selectedColor
+                                : normalColor
+                )
+        );
+
+        btnAll.setTextColor(
+                currentFilter.equals("All")
+                        ? Color.WHITE
+                        : Color.rgb(27, 94, 32)
+        );
+
+        btnFresh.setTextColor(
+                currentFilter.equals("Fresh")
+                        ? Color.WHITE
+                        : Color.rgb(27, 94, 32)
+        );
+
+        btnDryGoods.setTextColor(
+                currentFilter.equals("Dry Goods")
+                        ? Color.WHITE
+                        : Color.rgb(27, 94, 32)
+        );
+
+        btnDairy.setTextColor(
+                currentFilter.equals("Dairy")
+                        ? Color.WHITE
+                        : Color.rgb(27, 94, 32)
+        );
     }
 
     private void loadIngredients() {
 
-        if (ingredientContainer == null ||
-                databaseHelper == null) {
-
-            return;
-        }
-
         ingredientContainer.removeAllViews();
 
-        Cursor cursor = null;
+        Cursor cursor = databaseHelper.getAllIngredients();
 
-        int visibleCount = 0;
+        int totalItems = cursor.getCount();
 
-        try {
+        txtItemCount.setText(
+                totalItems + (totalItems == 1 ? " item" : " items")
+        );
 
-            cursor =
-                    databaseHelper.getAllIngredients();
+        String searchText =
+                searchPantry.getText()
+                        .toString()
+                        .trim()
+                        .toLowerCase();
 
-            if (cursor != null &&
-                    cursor.moveToFirst()) {
+        int displayedItems = 0;
 
-                do {
+        if (cursor.moveToFirst()) {
 
-                    long id =
-                            getColumnId(cursor);
+            do {
 
-                    String name =
-                            getColumnValue(
-                                    cursor,
-                                    DatabaseHelper.COLUMN_NAME
-                            );
+                int id =
+                        cursor.getInt(
+                                cursor.getColumnIndexOrThrow(
+                                        DatabaseHelper.COLUMN_ID
+                                )
+                        );
 
-                    String quantity =
-                            getColumnValue(
-                                    cursor,
-                                    DatabaseHelper.COLUMN_QUANTITY
-                            );
+                String name =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        DatabaseHelper.COLUMN_NAME
+                                )
+                        );
 
-                    String unit =
-                            getColumnValue(
-                                    cursor,
-                                    DatabaseHelper.COLUMN_UNIT
-                            );
+                String quantity =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        DatabaseHelper.COLUMN_QUANTITY
+                                )
+                        );
 
-                    String expiryDate =
-                            getColumnValue(
-                                    cursor,
-                                    DatabaseHelper.COLUMN_EXPIRY_DATE
-                            );
+                String unit =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        DatabaseHelper.COLUMN_UNIT
+                                )
+                        );
 
-                    if (!currentSearch.isEmpty()) {
+                String expiryDate =
+                        cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                        DatabaseHelper.COLUMN_EXPIRY_DATE
+                                )
+                        );
 
-                        String searchableText =
-                                (
-                                        name + " "
-                                                + quantity + " "
-                                                + unit + " "
-                                                + expiryDate
-                                ).toLowerCase();
+                if (!searchText.isEmpty()
+                        && !name.toLowerCase().contains(searchText)) {
 
-                        if (!searchableText.contains(
-                                currentSearch.toLowerCase()
-                        )) {
+                    continue;
+                }
 
-                            continue;
-                        }
+                if (!currentFilter.equals("All")) {
+
+                    String lowerName =
+                            name.toLowerCase();
+
+                    boolean matches = false;
+
+                    if (currentFilter.equals("Fresh")) {
+
+                        matches =
+                                lowerName.contains("fruit")
+                                        || lowerName.contains("apple")
+                                        || lowerName.contains("banana")
+                                        || lowerName.contains("orange")
+                                        || lowerName.contains("vegetable")
+                                        || lowerName.contains("tomato")
+                                        || lowerName.contains("lettuce")
+                                        || lowerName.contains("carrot");
+
+                    } else if (currentFilter.equals("Dry Goods")) {
+
+                        matches =
+                                lowerName.contains("rice")
+                                        || lowerName.contains("pasta")
+                                        || lowerName.contains("flour")
+                                        || lowerName.contains("sugar")
+                                        || lowerName.contains("beans")
+                                        || lowerName.contains("cereal");
+
+                    } else if (currentFilter.equals("Dairy")) {
+
+                        matches =
+                                lowerName.contains("milk")
+                                        || lowerName.contains("cheese")
+                                        || lowerName.contains("yogurt")
+                                        || lowerName.contains("butter")
+                                        || lowerName.contains("cream");
                     }
 
-                    if (!matchesCategory(
-                            name,
-                            unit
-                    )) {
-
+                    if (!matches) {
                         continue;
                     }
+                }
 
-                    addIngredientToScreen(
-                            id,
-                            name,
-                            quantity,
-                            unit,
-                            expiryDate
-                    );
+                displayedItems++;
 
-                    visibleCount++;
+                addIngredientView(
+                        id,
+                        name,
+                        quantity,
+                        unit,
+                        expiryDate
+                );
 
-                } while (cursor.moveToNext());
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Toast.makeText(
-                    this,
-                    "Error loading ingredients.",
-                    Toast.LENGTH_SHORT
-            ).show();
-
-        } finally {
-
-            if (cursor != null) {
-                cursor.close();
-            }
+            } while (cursor.moveToNext());
         }
 
-        if (visibleCount == 1) {
+        cursor.close();
 
-            txtItemCount.setText(
-                    "1 item"
-            );
-
+        if (displayedItems == 0) {
+            emptyState.setVisibility(View.VISIBLE);
         } else {
-
-            txtItemCount.setText(
-                    visibleCount + " items"
-            );
-        }
-
-        if (visibleCount == 0) {
-
-            ingredientContainer.setVisibility(
-                    View.GONE
-            );
-
-            emptyState.setVisibility(
-                    View.VISIBLE
-            );
-
-            if (currentSearch.isEmpty()) {
-
-                txtEmptyTitle.setText(
-                        "Your pantry is empty"
-                );
-
-                txtEmptyMessage.setText(
-                        "Add your first ingredient to start managing your pantry."
-                );
-
-            } else {
-
-                txtEmptyTitle.setText(
-                        "No ingredients found"
-                );
-
-                txtEmptyMessage.setText(
-                        "Try another search."
-                );
-            }
-
-        } else {
-
-            ingredientContainer.setVisibility(
-                    View.VISIBLE
-            );
-
-            emptyState.setVisibility(
-                    View.GONE
-            );
+            emptyState.setVisibility(View.GONE);
         }
     }
 
-    private long getColumnId(Cursor cursor) {
-
-        int columnIndex =
-                cursor.getColumnIndex(
-                        DatabaseHelper.COLUMN_ID
-                );
-
-        if (columnIndex == -1) {
-            return -1;
-        }
-
-        return cursor.getLong(columnIndex);
-    }
-
-    private String getColumnValue(
-            Cursor cursor,
-            String columnName
-    ) {
-
-        int columnIndex =
-                cursor.getColumnIndex(columnName);
-
-        if (columnIndex == -1) {
-            return "";
-        }
-
-        String value =
-                cursor.getString(columnIndex);
-
-        if (value == null) {
-            return "";
-        }
-
-        return value;
-    }
-
-    private boolean matchesCategory(
-            String name,
-            String unit
-    ) {
-
-        if (currentCategory.equals("All")) {
-            return true;
-        }
-
-        String ingredient =
-                name.toLowerCase().trim();
-
-        String ingredientUnit =
-                unit.toLowerCase().trim();
-
-        if (currentCategory.equals("Fresh")) {
-
-            return ingredient.contains("apple")
-                    || ingredient.contains("banana")
-                    || ingredient.contains("orange")
-                    || ingredient.contains("tomato")
-                    || ingredient.contains("lettuce")
-                    || ingredient.contains("spinach")
-                    || ingredient.contains("carrot")
-                    || ingredient.contains("potato")
-                    || ingredient.contains("vegetable")
-                    || ingredient.contains("chicken")
-                    || ingredient.contains("beef")
-                    || ingredient.contains("meat")
-                    || ingredient.contains("fish")
-                    || ingredient.contains("fruit");
-        }
-
-        if (currentCategory.equals("Dairy")) {
-
-            return ingredient.contains("milk")
-                    || ingredient.contains("cheese")
-                    || ingredient.contains("yogurt")
-                    || ingredient.contains("yoghurt")
-                    || ingredient.contains("butter")
-                    || ingredient.contains("cream")
-                    || ingredient.contains("custard")
-                    || ingredient.contains("cheddar");
-        }
-
-        if (currentCategory.equals("Dry Goods")) {
-
-            return ingredient.contains("rice")
-                    || ingredient.contains("pasta")
-                    || ingredient.contains("flour")
-                    || ingredient.contains("sugar")
-                    || ingredient.contains("salt")
-                    || ingredient.contains("cereal")
-                    || ingredient.contains("beans")
-                    || ingredient.contains("lentils")
-                    || ingredient.contains("bread")
-                    || ingredient.contains("coffee")
-                    || ingredient.contains("tea")
-                    || ingredient.contains("spice")
-                    || ingredient.contains("oil")
-                    || ingredient.contains("tuna")
-                    || ingredient.contains("can")
-                    || ingredient.contains("tin")
-                    || ingredientUnit.contains("kg")
-                    || ingredientUnit.contains("g");
-        }
-
-        return true;
-    }
-
-    private void addIngredientToScreen(
-            long id,
+    private void addIngredientView(
+            int id,
             String name,
             String quantity,
             String unit,
             String expiryDate
     ) {
 
-        LinearLayout card =
+        LinearLayout itemLayout =
                 new LinearLayout(this);
 
-        card.setOrientation(
+        itemLayout.setOrientation(
                 LinearLayout.VERTICAL
         );
 
-        card.setPadding(
-                24,
-                20,
-                24,
+        itemLayout.setPadding(
+                16,
+                16,
+                16,
                 20
         );
 
-        LinearLayout.LayoutParams cardParams =
+        LinearLayout.LayoutParams itemParams =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
                 );
 
-        cardParams.setMargins(
+        itemParams.setMargins(
                 0,
+                8,
                 0,
-                0,
-                20
+                8
         );
 
-        card.setLayoutParams(cardParams);
+        itemLayout.setLayoutParams(itemParams);
 
         TextView nameText =
                 new TextView(this);
 
         nameText.setText(name);
-
-        nameText.setTextSize(22);
-
+        nameText.setTextSize(30);
         nameText.setTextColor(
-                Color.rgb(
-                        17,
-                        17,
-                        17
-                )
+                Color.BLACK
         );
 
         nameText.setTypeface(
@@ -518,92 +397,123 @@ public class MainActivity extends AppCompatActivity {
                 Typeface.BOLD
         );
 
+        itemLayout.addView(nameText);
+
         TextView quantityText =
                 new TextView(this);
 
         quantityText.setText(
-                "Quantity: "
-                        + quantity
-                        + " "
-                        + unit
+                "Quantity: " + quantity + " " + unit
         );
 
-        quantityText.setTextSize(18);
-
+        quantityText.setTextSize(22);
         quantityText.setTextColor(
-                Color.rgb(
-                        100,
-                        100,
-                        100
-                )
+                Color.DKGRAY
         );
 
-        quantityText.setPadding(
+        LinearLayout.LayoutParams textParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        textParams.setMargins(
                 0,
-                6,
+                4,
                 0,
                 0
         );
+
+        quantityText.setLayoutParams(textParams);
+
+        itemLayout.addView(quantityText);
 
         TextView expiryText =
                 new TextView(this);
 
         expiryText.setText(
-                "Expiry Date: "
-                        + expiryDate
+                "Expiry Date: " + expiryDate
         );
 
-        expiryText.setTextSize(18);
-
+        expiryText.setTextSize(22);
         expiryText.setTextColor(
-                Color.rgb(
-                        100,
-                        100,
-                        100
-                )
+                Color.DKGRAY
         );
 
-        expiryText.setPadding(
-                0,
-                6,
-                0,
-                12
-        );
+        expiryText.setLayoutParams(textParams);
 
-        card.addView(nameText);
+        itemLayout.addView(expiryText);
 
-        card.addView(quantityText);
-
-        card.addView(expiryText);
-
-        LinearLayout buttonRow =
+        LinearLayout buttonLayout =
                 new LinearLayout(this);
 
-        buttonRow.setOrientation(
+        buttonLayout.setOrientation(
                 LinearLayout.HORIZONTAL
         );
 
-        buttonRow.setGravity(
-                android.view.Gravity.CENTER_VERTICAL
+        buttonLayout.setGravity(
+                Gravity.CENTER_VERTICAL
         );
+
+        LinearLayout.LayoutParams buttonLayoutParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+
+        buttonLayoutParams.setMargins(
+                0,
+                16,
+                0,
+                0
+        );
+
+        buttonLayout.setLayoutParams(
+                buttonLayoutParams
+        );
+
+        // EDIT BUTTON
 
         Button editButton =
                 new Button(this);
 
         editButton.setText("Edit");
+        editButton.setTextSize(14);
+        editButton.setTextColor(
+                Color.WHITE
+        );
 
-        editButton.setTextColor(Color.WHITE);
+        editButton.setAllCaps(false);
 
-        editButton.setTextSize(16);
+        editButton.setGravity(
+                Gravity.CENTER
+        );
+
+        editButton.setPadding(
+                20,
+                8,
+                20,
+                8
+        );
+
+        editButton.setMinHeight(64);
+        editButton.setMinimumHeight(64);
+        editButton.setMinWidth(0);
 
         editButton.setBackgroundTintList(
-                ColorStateList.valueOf(GREEN)
+                ColorStateList.valueOf(
+                        Color.rgb(
+                                76,
+                                175,
+                                80
+                        )
+                )
         );
 
         LinearLayout.LayoutParams editParams =
                 new LinearLayout.LayoutParams(
                         0,
-                        56,
+                        64,
                         1
                 );
 
@@ -616,25 +526,60 @@ public class MainActivity extends AppCompatActivity {
 
         editButton.setLayoutParams(editParams);
 
+        editButton.setOnClickListener(
+                view -> showEditIngredientDialog(
+                        id,
+                        name,
+                        quantity,
+                        unit,
+                        expiryDate
+                )
+        );
+
+        buttonLayout.addView(editButton);
+
+        // DELETE BUTTON
+
         Button deleteButton =
                 new Button(this);
 
         deleteButton.setText("Delete");
+        deleteButton.setTextSize(14);
+        deleteButton.setTextColor(
+                Color.WHITE
+        );
 
-        deleteButton.setTextColor(Color.WHITE);
+        deleteButton.setAllCaps(false);
 
-        deleteButton.setTextSize(16);
+        deleteButton.setGravity(
+                Gravity.CENTER
+        );
+
+        deleteButton.setPadding(
+                20,
+                8,
+                20,
+                8
+        );
+
+        deleteButton.setMinHeight(64);
+        deleteButton.setMinimumHeight(64);
+        deleteButton.setMinWidth(0);
 
         deleteButton.setBackgroundTintList(
                 ColorStateList.valueOf(
-                        Color.rgb(198, 40, 40)
+                        Color.rgb(
+                                211,
+                                47,
+                                47
+                        )
                 )
         );
 
         LinearLayout.LayoutParams deleteParams =
                 new LinearLayout.LayoutParams(
                         0,
-                        56,
+                        64,
                         1
                 );
 
@@ -649,34 +594,24 @@ public class MainActivity extends AppCompatActivity {
                 deleteParams
         );
 
-        editButton.setOnClickListener(
-                view -> showEditIngredientDialog(
-                        id,
-                        name,
-                        quantity,
-                        unit,
-                        expiryDate
-                )
-        );
-
         deleteButton.setOnClickListener(
-                view -> showDeleteConfirmation(
+                view -> confirmDeleteIngredient(
                         id,
                         name
                 )
         );
 
-        buttonRow.addView(editButton);
+        buttonLayout.addView(deleteButton);
 
-        buttonRow.addView(deleteButton);
+        itemLayout.addView(buttonLayout);
 
-        card.addView(buttonRow);
-
-        ingredientContainer.addView(card);
+        ingredientContainer.addView(
+                itemLayout
+        );
     }
 
     private void showEditIngredientDialog(
-            long id,
+            int id,
             String currentName,
             String currentQuantity,
             String currentUnit,
@@ -692,7 +627,7 @@ public class MainActivity extends AppCompatActivity {
 
         layout.setPadding(
                 40,
-                10,
+                20,
                 40,
                 10
         );
@@ -700,57 +635,49 @@ public class MainActivity extends AppCompatActivity {
         EditText nameInput =
                 new EditText(this);
 
-        nameInput.setHint("Ingredient Name");
-
+        nameInput.setHint("Ingredient name");
         nameInput.setSingleLine(true);
-
         nameInput.setText(currentName);
+
+        layout.addView(nameInput);
 
         EditText quantityInput =
                 new EditText(this);
 
         quantityInput.setHint("Quantity");
-
         quantityInput.setSingleLine(true);
 
         quantityInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
-                        | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+                InputType.TYPE_CLASS_NUMBER
+                        | InputType.TYPE_NUMBER_FLAG_DECIMAL
         );
 
-        quantityInput.setText(currentQuantity);
+        quantityInput.setText(
+                currentQuantity
+        );
+
+        layout.addView(quantityInput);
 
         EditText unitInput =
                 new EditText(this);
 
         unitInput.setHint("Unit");
-
         unitInput.setSingleLine(true);
-
         unitInput.setText(currentUnit);
+
+        layout.addView(unitInput);
 
         EditText expiryInput =
                 new EditText(this);
 
         expiryInput.setHint("DD/MM/YYYY");
-
         expiryInput.setSingleLine(true);
 
         expiryInput.setInputType(
-                android.text.InputType.TYPE_CLASS_NUMBER
+                InputType.TYPE_CLASS_NUMBER
         );
 
-        expiryInput.setFilters(new android.text.InputFilter[]{
-                new android.text.InputFilter.LengthFilter(10)
-        });
-
         expiryInput.setText(currentExpiryDate);
-
-        layout.addView(nameInput);
-
-        layout.addView(quantityInput);
-
-        layout.addView(unitInput);
 
         layout.addView(expiryInput);
 
@@ -776,37 +703,37 @@ public class MainActivity extends AppCompatActivity {
                                     AlertDialog.BUTTON_POSITIVE
                             );
 
-                    saveButton.setTextColor(
-                            GREEN_DARK
-                    );
-
                     saveButton.setOnClickListener(
                             view -> {
 
-                                String newName =
-                                        nameInput.getText()
+                                String name =
+                                        nameInput
+                                                .getText()
                                                 .toString()
                                                 .trim();
 
-                                String newQuantity =
-                                        quantityInput.getText()
+                                String quantity =
+                                        quantityInput
+                                                .getText()
                                                 .toString()
                                                 .trim();
 
-                                String newUnit =
-                                        unitInput.getText()
+                                String unit =
+                                        unitInput
+                                                .getText()
                                                 .toString()
                                                 .trim();
 
-                                String newExpiry =
-                                        expiryInput.getText()
+                                String expiry =
+                                        expiryInput
+                                                .getText()
                                                 .toString()
                                                 .trim();
 
-                                if (newName.isEmpty()
-                                        || newQuantity.isEmpty()
-                                        || newUnit.isEmpty()
-                                        || newExpiry.isEmpty()) {
+                                if (name.isEmpty()
+                                        || quantity.isEmpty()
+                                        || unit.isEmpty()
+                                        || expiry.isEmpty()) {
 
                                     Toast.makeText(
                                             MainActivity.this,
@@ -817,48 +744,57 @@ public class MainActivity extends AppCompatActivity {
                                     return;
                                 }
 
-                                if (!newExpiry.matches(
-                                        "\\d{2}/\\d{2}/\\d{4}"
-                                )) {
-
-                                    Toast.makeText(
-                                            MainActivity.this,
-                                            "Enter the expiry date as DD/MM/YYYY.",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-
-                                    return;
-                                }
-
-                                int result =
-                                        databaseHelper.updateIngredient(
-                                                id,
-                                                newName,
-                                                newQuantity,
-                                                newUnit,
-                                                newExpiry
+                                DatabaseHelper db =
+                                        new DatabaseHelper(
+                                                MainActivity.this
                                         );
 
-                                if (result > 0) {
+                                SQLiteDatabase database =
+                                        db.getWritableDatabase();
 
-                                    Toast.makeText(
-                                            MainActivity.this,
-                                            "Ingredient updated.",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
+                                ContentValues values =
+                                        new ContentValues();
 
-                                    dialog.dismiss();
+                                values.put(
+                                        DatabaseHelper.COLUMN_NAME,
+                                        name
+                                );
 
-                                    loadIngredients();
+                                values.put(
+                                        DatabaseHelper.COLUMN_QUANTITY,
+                                        quantity
+                                );
 
-                                } else {
+                                values.put(
+                                        DatabaseHelper.COLUMN_UNIT,
+                                        unit
+                                );
 
-                                    Toast.makeText(
-                                            MainActivity.this,
-                                            "Failed to update ingredient.",
-                                            Toast.LENGTH_SHORT
-                                    ).show();
-                                }
+                                values.put(
+                                        DatabaseHelper.COLUMN_EXPIRY_DATE,
+                                        expiry
+                                );
+
+                                database.update(
+                                        DatabaseHelper.TABLE_INGREDIENTS,
+                                        values,
+                                        DatabaseHelper.COLUMN_ID + "=?",
+                                        new String[]{
+                                                String.valueOf(id)
+                                        }
+                                );
+
+                                database.close();
+
+                                dialog.dismiss();
+
+                                Toast.makeText(
+                                        MainActivity.this,
+                                        "Ingredient updated.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+
+                                loadIngredients();
                             }
                     );
                 }
@@ -867,17 +803,15 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void showDeleteConfirmation(
-            long id,
+    private void confirmDeleteIngredient(
+            int id,
             String name
     ) {
 
         new AlertDialog.Builder(this)
                 .setTitle("Delete Ingredient")
                 .setMessage(
-                        "Are you sure you want to delete "
-                                + name
-                                + "?"
+                        "Delete " + name + " from your pantry?"
                 )
                 .setNegativeButton(
                         "Cancel",
@@ -887,168 +821,17 @@ public class MainActivity extends AppCompatActivity {
                         "Delete",
                         (dialog, which) -> {
 
-                            int result =
-                                    databaseHelper.deleteIngredient(
-                                            id
-                                    );
+                            databaseHelper.deleteIngredient(id);
 
-                            if (result > 0) {
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "Ingredient deleted.",
+                                    Toast.LENGTH_SHORT
+                                    ).show();
 
-                                Toast.makeText(
-                                        MainActivity.this,
-                                        "Ingredient deleted.",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-
-                                loadIngredients();
-
-                            } else {
-
-                                Toast.makeText(
-                                        MainActivity.this,
-                                        "Failed to delete ingredient.",
-                                        Toast.LENGTH_SHORT
-                                ).show();
-                            }
+                            loadIngredients();
                         }
                 )
                 .show();
-    }
-
-    private void updateCategoryButtons() {
-
-        if (btnAll == null ||
-                btnFresh == null ||
-                btnDryGoods == null ||
-                btnDairy == null) {
-
-            return;
-        }
-
-        if (currentCategory.equals("All")) {
-
-            btnAll.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_DARK
-                    )
-            );
-
-            btnAll.setTextColor(
-                    Color.WHITE
-            );
-
-        } else {
-
-            btnAll.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_LIGHT
-                    )
-            );
-
-            btnAll.setTextColor(
-                    DARK_GREEN_TEXT
-            );
-        }
-
-        if (currentCategory.equals("Fresh")) {
-
-            btnFresh.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_DARK
-                    )
-            );
-
-            btnFresh.setTextColor(
-                    Color.WHITE
-            );
-
-        } else {
-
-            btnFresh.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_LIGHT
-                    )
-            );
-
-            btnFresh.setTextColor(
-                    DARK_GREEN_TEXT
-            );
-        }
-
-        if (currentCategory.equals("Dry Goods")) {
-
-            btnDryGoods.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_DARK
-                    )
-            );
-
-            btnDryGoods.setTextColor(
-                    Color.WHITE
-            );
-
-        } else {
-
-            btnDryGoods.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_LIGHT
-                    )
-            );
-
-            btnDryGoods.setTextColor(
-                    DARK_GREEN_TEXT
-            );
-        }
-
-        if (currentCategory.equals("Dairy")) {
-
-            btnDairy.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_DARK
-                    )
-            );
-
-            btnDairy.setTextColor(
-                    Color.WHITE
-            );
-
-        } else {
-
-            btnDairy.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_LIGHT
-                    )
-            );
-
-            btnDairy.setTextColor(
-                    DARK_GREEN_TEXT
-            );
-        }
-
-        if (btnRecipes != null) {
-
-            btnRecipes.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN_DARK
-                    )
-            );
-
-            btnRecipes.setTextColor(
-                    Color.WHITE
-            );
-        }
-
-        if (btnAddIngredient != null) {
-
-            btnAddIngredient.setBackgroundTintList(
-                    ColorStateList.valueOf(
-                            GREEN
-                    )
-            );
-
-            btnAddIngredient.setTextColor(
-                    Color.WHITE
-            );
-        }
     }
 }
