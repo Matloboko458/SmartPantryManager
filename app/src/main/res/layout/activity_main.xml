@@ -5,13 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:isScrollContainer="true"
+    android:fitsSystemWindows="true"
     android:background="@color/bg_color">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:clipToPadding="false"
+        android:paddingBottom="120dp">
 
         <!-- HEADER -->
         <LinearLayout
