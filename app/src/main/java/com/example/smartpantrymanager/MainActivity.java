@@ -347,9 +347,9 @@ public class MainActivity extends AppCompatActivity {
                         matches =
                                 lowerName.contains("rice")
                                         || lowerName.contains("pasta")
-                                        || lowerName.contains("flour")
-                                        || lowerName.contains("sugar")
                                         || lowerName.contains("beans")
+                                        || lowerName.contains("sugar")
+                                        || lowerName.contains("flour")
                                         || lowerName.contains("cereal");
 
                     } else if (currentFilter.equals("Dairy")) {
@@ -358,8 +358,8 @@ public class MainActivity extends AppCompatActivity {
                                 lowerName.contains("milk")
                                         || lowerName.contains("cheese")
                                         || lowerName.contains("yogurt")
-                                        || lowerName.contains("butter")
-                                        || lowerName.contains("cream");
+                                        || lowerName.contains("cream")
+                                        || lowerName.contains("butter");
                     }
 
                     if (!matches) {
