@@ -21,12 +21,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
 
-    private LinearLayout ingredientContainer;
+    private RecyclerView recyclerViewIngredients;
+    private IngredientAdapter ingredientAdapter;
+    private final List<IngredientModel> ingredientList = new ArrayList<>();
+
     private LinearLayout emptyState;
     private TextView txtItemCount;
     private EditText searchPantry;
@@ -48,7 +56,31 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
-        ingredientContainer = findViewById(R.id.ingredientContainer);
+        recyclerViewIngredients = findViewById(R.id.recyclerViewIngredients);
+        recyclerViewIngredients.setLayoutManager(new LinearLayoutManager(this));
+
+        ingredientAdapter = new IngredientAdapter(this, ingredientList, new IngredientAdapter.OnItemClickListener() {
+            @Override
+            public void onEditClick(IngredientModel ingredient) {
+                showEditIngredientDialog(
+                        ingredient.getId(),
+                        ingredient.getName(),
+                        ingredient.getQuantity(),
+                        ingredient.getUnit(),
+                        ingredient.getExpiryDate()
+                );
+            }
+
+            @Override
+            public void onDeleteClick(IngredientModel ingredient) {
+                confirmDeleteIngredient(
+                        ingredient.getId(),
+                        ingredient.getName()
+                );
+            }
+        });
+        recyclerViewIngredients.setAdapter(ingredientAdapter);
+
         emptyState = findViewById(R.id.emptyState);
         txtItemCount = findViewById(R.id.txtItemCount);
         searchPantry = findViewById(R.id.searchPantry);
@@ -59,6 +91,17 @@ public class MainActivity extends AppCompatActivity {
         btnDairy = findViewById(R.id.btnDairy);
         btnRecipes = findViewById(R.id.btnRecipes);
         btnAddIngredient = findViewById(R.id.btnAddIngredient);
+
+        Button btnProfileMain = findViewById(R.id.btnProfileMain);
+        Button btnSettingsMain = findViewById(R.id.btnSettingsMain);
+
+        btnProfileMain.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+        });
+
+        btnSettingsMain.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+        });
 
         btnAll.setOnClickListener(view -> {
             currentFilter = "All";
@@ -217,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadIngredients() {
 
-        ingredientContainer.removeAllViews();
+        ingredientList.clear();
 
         Cursor cursor = databaseHelper.getAllIngredients();
 
@@ -326,288 +369,26 @@ public class MainActivity extends AppCompatActivity {
 
                 displayedItems++;
 
-                addIngredientView(
+                ingredientList.add(new IngredientModel(
                         id,
                         name,
                         quantity,
                         unit,
                         expiryDate
-                );
+                ));
 
             } while (cursor.moveToNext());
         }
 
         cursor.close();
 
+        ingredientAdapter.notifyDataSetChanged();
+
         if (displayedItems == 0) {
             emptyState.setVisibility(View.VISIBLE);
         } else {
             emptyState.setVisibility(View.GONE);
         }
-    }
-
-    private void addIngredientView(
-            int id,
-            String name,
-            String quantity,
-            String unit,
-            String expiryDate
-    ) {
-
-        LinearLayout itemLayout =
-                new LinearLayout(this);
-
-        itemLayout.setOrientation(
-                LinearLayout.VERTICAL
-        );
-
-        itemLayout.setPadding(
-                16,
-                16,
-                16,
-                20
-        );
-
-        LinearLayout.LayoutParams itemParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        itemParams.setMargins(
-                0,
-                8,
-                0,
-                8
-        );
-
-        itemLayout.setLayoutParams(itemParams);
-
-        TextView nameText =
-                new TextView(this);
-
-        nameText.setText(name);
-        nameText.setTextSize(30);
-        nameText.setTextColor(
-                Color.BLACK
-        );
-
-        nameText.setTypeface(
-                null,
-                Typeface.BOLD
-        );
-
-        itemLayout.addView(nameText);
-
-        TextView quantityText =
-                new TextView(this);
-
-        quantityText.setText(
-                "Quantity: " + quantity + " " + unit
-        );
-
-        quantityText.setTextSize(22);
-        quantityText.setTextColor(
-                Color.DKGRAY
-        );
-
-        LinearLayout.LayoutParams textParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        textParams.setMargins(
-                0,
-                4,
-                0,
-                0
-        );
-
-        quantityText.setLayoutParams(textParams);
-
-        itemLayout.addView(quantityText);
-
-        TextView expiryText =
-                new TextView(this);
-
-        expiryText.setText(
-                "Expiry Date: " + expiryDate
-        );
-
-        expiryText.setTextSize(22);
-        expiryText.setTextColor(
-                Color.DKGRAY
-        );
-
-        expiryText.setLayoutParams(textParams);
-
-        itemLayout.addView(expiryText);
-
-        LinearLayout buttonLayout =
-                new LinearLayout(this);
-
-        buttonLayout.setOrientation(
-                LinearLayout.HORIZONTAL
-        );
-
-        buttonLayout.setGravity(
-                Gravity.CENTER_VERTICAL
-        );
-
-        LinearLayout.LayoutParams buttonLayoutParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        buttonLayoutParams.setMargins(
-                0,
-                16,
-                0,
-                0
-        );
-
-        buttonLayout.setLayoutParams(
-                buttonLayoutParams
-        );
-
-        // EDIT BUTTON
-
-        Button editButton =
-                new Button(this);
-
-        editButton.setText("Edit");
-        editButton.setTextSize(14);
-        editButton.setTextColor(
-                Color.WHITE
-        );
-
-        editButton.setAllCaps(false);
-
-        editButton.setGravity(
-                Gravity.CENTER
-        );
-
-        editButton.setPadding(
-                20,
-                8,
-                20,
-                8
-        );
-
-        editButton.setMinHeight(64);
-        editButton.setMinimumHeight(64);
-        editButton.setMinWidth(0);
-
-        editButton.setBackgroundTintList(
-                ColorStateList.valueOf(
-                        Color.rgb(
-                                76,
-                                175,
-                                80
-                        )
-                )
-        );
-
-        LinearLayout.LayoutParams editParams =
-                new LinearLayout.LayoutParams(
-                        0,
-                        64,
-                        1
-                );
-
-        editParams.setMargins(
-                0,
-                0,
-                8,
-                0
-        );
-
-        editButton.setLayoutParams(editParams);
-
-        editButton.setOnClickListener(
-                view -> showEditIngredientDialog(
-                        id,
-                        name,
-                        quantity,
-                        unit,
-                        expiryDate
-                )
-        );
-
-        buttonLayout.addView(editButton);
-
-        // DELETE BUTTON
-
-        Button deleteButton =
-                new Button(this);
-
-        deleteButton.setText("Delete");
-        deleteButton.setTextSize(14);
-        deleteButton.setTextColor(
-                Color.WHITE
-        );
-
-        deleteButton.setAllCaps(false);
-
-        deleteButton.setGravity(
-                Gravity.CENTER
-        );
-
-        deleteButton.setPadding(
-                20,
-                8,
-                20,
-                8
-        );
-
-        deleteButton.setMinHeight(64);
-        deleteButton.setMinimumHeight(64);
-        deleteButton.setMinWidth(0);
-
-        deleteButton.setBackgroundTintList(
-                ColorStateList.valueOf(
-                        Color.rgb(
-                                211,
-                                47,
-                                47
-                        )
-                )
-        );
-
-        LinearLayout.LayoutParams deleteParams =
-                new LinearLayout.LayoutParams(
-                        0,
-                        64,
-                        1
-                );
-
-        deleteParams.setMargins(
-                8,
-                0,
-                0,
-                0
-        );
-
-        deleteButton.setLayoutParams(
-                deleteParams
-        );
-
-        deleteButton.setOnClickListener(
-                view -> confirmDeleteIngredient(
-                        id,
-                        name
-                )
-        );
-
-        buttonLayout.addView(deleteButton);
-
-        itemLayout.addView(buttonLayout);
-
-        ingredientContainer.addView(
-                itemLayout
-        );
     }
 
     private void showEditIngredientDialog(

@@ -1,17 +1,30 @@
 package com.example.smartpantrymanager;
 
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,11 +39,13 @@ public class RecipesActivity extends AppCompatActivity {
 
     private LinearLayout recipeContainer;
     private DatabaseHelper databaseHelper;
+    private Spinner recipeFilterSpinner;
+    private String currentRecipeFilter = "Suggested Recipes";
 
     private final List<PantryItem> pantryItems =
             new ArrayList<>();
 
-    private final List<Recipe> recipes =
+    private static final List<Recipe> recipes =
             new ArrayList<>();
 
     @Override
@@ -52,6 +67,51 @@ public class RecipesActivity extends AppCompatActivity {
                 view -> finish()
         );
 
+        Button btnAddRecipe =
+                findViewById(R.id.btnAddRecipe);
+
+        btnAddRecipe.setOnClickListener(
+                view -> showAddRecipeDialog()
+        );
+
+        recipeFilterSpinner = findViewById(R.id.recipeFilterSpinner);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new String[]{"Suggested Recipes", "All Recipes"}
+        ) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView tv = (TextView) view;
+                tv.setTextColor(Color.BLACK);
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView tv = (TextView) view;
+                tv.setTextColor(Color.BLACK);
+                return view;
+            }
+        };
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        recipeFilterSpinner.setAdapter(adapter);
+
+        recipeFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentRecipeFilter = parent.getItemAtPosition(position).toString();
+                loadRecipes();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
         createRecipes();
 
         loadRecipes();
@@ -70,7 +130,9 @@ public class RecipesActivity extends AppCompatActivity {
 
     private void createRecipes() {
 
-        recipes.clear();
+        if (!recipes.isEmpty()) {
+            return;
+        }
 
         recipes.add(new Recipe(
                 "Egg & Cheese Toast",
@@ -427,33 +489,205 @@ public class RecipesActivity extends AppCompatActivity {
                         "4. Add salt.\n" +
                         "5. Serve."
         ));
+
+        loadCustomRecipes();
+    }
+
+    private static final String PREF_NAME = "SmartPantryPrefs";
+    private static final String KEY_CUSTOM_RECIPES = "custom_recipes_json";
+
+    private void saveCustomRecipe(Recipe recipe) {
+        try {
+            SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+            String jsonStr = prefs.getString(KEY_CUSTOM_RECIPES, "[]");
+            JSONArray arr = new JSONArray(jsonStr);
+
+            JSONObject obj = new JSONObject();
+            obj.put("name", recipe.name);
+            obj.put("cookingTime", recipe.cookingTime);
+            obj.put("difficulty", recipe.difficulty);
+            obj.put("description", recipe.description);
+            obj.put("instructions", recipe.instructions);
+
+            JSONArray reqArr = new JSONArray();
+            for (RequiredIngredient req : recipe.requiredIngredients) {
+                JSONObject reqObj = new JSONObject();
+                reqObj.put("name", req.name);
+                reqObj.put("quantity", req.quantity);
+                reqObj.put("unit", req.unit);
+                reqArr.put(reqObj);
+            }
+            obj.put("requiredIngredients", reqArr);
+
+            arr.put(obj);
+            prefs.edit().putString(KEY_CUSTOM_RECIPES, arr.toString()).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadCustomRecipes() {
+        try {
+            SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+            String jsonStr = prefs.getString(KEY_CUSTOM_RECIPES, "[]");
+            JSONArray arr = new JSONArray(jsonStr);
+
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                String name = obj.getString("name");
+                String cookingTime = obj.getString("cookingTime");
+                String difficulty = obj.getString("difficulty");
+                String description = obj.getString("description");
+                String instructions = obj.getString("instructions");
+
+                JSONArray reqArr = obj.getJSONArray("requiredIngredients");
+                RequiredIngredient[] reqs = new RequiredIngredient[reqArr.length()];
+                for (int j = 0; j < reqArr.length(); j++) {
+                    JSONObject reqObj = reqArr.getJSONObject(j);
+                    reqs[j] = new RequiredIngredient(
+                            reqObj.getString("name"),
+                            reqObj.getDouble("quantity"),
+                            reqObj.getString("unit")
+                    );
+                }
+
+                Recipe recipe = new Recipe(name, cookingTime, difficulty, description, reqs, instructions);
+
+                boolean exists = false;
+                for (Recipe r : recipes) {
+                    if (r.name.equalsIgnoreCase(recipe.name)) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    recipes.add(0, recipe);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showAddRecipeDialog() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 20, 40, 10);
+
+        final EditText nameInput = new EditText(this);
+        nameInput.setHint("Recipe Name");
+        nameInput.setSingleLine(true);
+        layout.addView(nameInput);
+
+        final EditText descInput = new EditText(this);
+        descInput.setHint("Description");
+        descInput.setSingleLine(true);
+        layout.addView(descInput);
+
+        final EditText timeInput = new EditText(this);
+        timeInput.setHint("Cooking Time (e.g., 15 minutes)");
+        timeInput.setSingleLine(true);
+        layout.addView(timeInput);
+
+        final EditText diffInput = new EditText(this);
+        diffInput.setHint("Difficulty (Easy / Medium / Hard)");
+        diffInput.setSingleLine(true);
+        layout.addView(diffInput);
+
+        final EditText ingNameInput = new EditText(this);
+        ingNameInput.setHint("Main Required Ingredient (e.g., egg)");
+        ingNameInput.setSingleLine(true);
+        layout.addView(ingNameInput);
+
+        final EditText ingQtyInput = new EditText(this);
+        ingQtyInput.setHint("Ingredient Quantity (e.g., 2)");
+        ingQtyInput.setSingleLine(true);
+        ingQtyInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(ingQtyInput);
+
+        final EditText ingUnitInput = new EditText(this);
+        ingUnitInput.setHint("Ingredient Unit (e.g., piece, g, ml)");
+        ingUnitInput.setSingleLine(true);
+        layout.addView(ingUnitInput);
+
+        final EditText instInput = new EditText(this);
+        instInput.setHint("Instructions (e.g., 1. Cook... 2. Serve)");
+        layout.addView(instInput);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Add Recipe")
+                .setView(layout)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Save", (d, which) -> {
+                    String name = nameInput.getText().toString().trim();
+                    String desc = descInput.getText().toString().trim();
+                    String time = timeInput.getText().toString().trim();
+                    String diff = diffInput.getText().toString().trim();
+                    String ingName = ingNameInput.getText().toString().trim();
+                    String ingQtyStr = ingQtyInput.getText().toString().trim();
+                    String ingUnit = ingUnitInput.getText().toString().trim();
+                    String inst = instInput.getText().toString().trim();
+
+                    if (name.isEmpty() || desc.isEmpty() || time.isEmpty() || diff.isEmpty() ||
+                            ingName.isEmpty() || ingQtyStr.isEmpty() || ingUnit.isEmpty() || inst.isEmpty()) {
+                        Toast.makeText(this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    double ingQty = parseQuantity(ingQtyStr);
+
+                    RequiredIngredient req = new RequiredIngredient(ingName, ingQty, ingUnit);
+                    Recipe newRecipe = new Recipe(name, time, diff, desc, new RequiredIngredient[]{req}, inst);
+
+                    recipes.add(0, newRecipe);
+                    saveCustomRecipe(newRecipe);
+                    loadRecipes();
+                    Toast.makeText(this, "Recipe added.", Toast.LENGTH_SHORT).show();
+                })
+                .create();
+
+        dialog.show();
     }
 
     private void loadRecipes() {
 
         loadPantryIngredients();
 
+        if (recipeContainer == null) {
+            return;
+        }
+
         recipeContainer.removeAllViews();
 
-        int matchingRecipeCount = 0;
+        int displayedRecipeCount = 0;
 
         for (Recipe recipe : recipes) {
 
-            if (canMakeRecipe(recipe)) {
+            boolean shouldShow = false;
+
+            if (currentRecipeFilter != null && currentRecipeFilter.equals("All Recipes")) {
+                shouldShow = true;
+            } else {
+                shouldShow = canMakeRecipe(recipe);
+            }
+
+            if (shouldShow) {
 
                 addRecipe(recipe);
 
-                matchingRecipeCount++;
+                displayedRecipeCount++;
             }
         }
 
-        if (matchingRecipeCount == 0) {
+        if (displayedRecipeCount == 0) {
 
             TextView emptyText =
                     new TextView(this);
 
             emptyText.setText(
-                    "No recipes match your pantry yet.\n\n" +
+                    currentRecipeFilter != null && currentRecipeFilter.equals("All Recipes")
+                            ? "No recipes available."
+                            : "No recipes match your pantry yet.\n\n" +
                             "Add more ingredients to unlock recipes."
             );
 
@@ -463,7 +697,7 @@ public class RecipesActivity extends AppCompatActivity {
             );
 
             emptyText.setGravity(
-                    android.view.Gravity.CENTER
+                    Gravity.CENTER
             );
 
             emptyText.setPadding(
