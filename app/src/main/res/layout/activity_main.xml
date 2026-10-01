@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    android:orientation="vertical"
     android:background="@color/bg_color">
 
+    <!-- FIXED TOP SECTION (HEADER & SEARCH BAR) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp"
-        android:clipToPadding="false"
-        android:paddingBottom="120dp">
+        android:paddingBottom="12dp">
 
         <!-- HEADER -->
         <LinearLayout
@@ -101,12 +100,12 @@
 
         </LinearLayout>
 
-        <!-- SEARCH -->
+        <!-- STATIONARY SEARCH BAR -->
         <EditText
             android:id="@+id/searchPantry"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/card_background"
             android:hint="Search your pantry..."
             android:padding="18dp"
@@ -115,185 +114,205 @@
             android:textSize="18sp"
             android:singleLine="true" />
 
-        <!-- MY PANTRY HEADER -->
+    </LinearLayout>
+
+    <!-- SCROLLABLE CONTENT SECTION (MY PANTRY, CATEGORIES, RECIPES & INGREDIENTS) -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:isScrollContainer="true"
+        android:clipToPadding="false">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="100dp">
 
-            <TextView
-                android:layout_width="0dp"
+            <!-- MY PANTRY HEADER -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="My Pantry"
-                android:textColor="@color/text_primary"
-                android:textSize="30sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/txtItemCount"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="My Pantry"
+                    android:textColor="@color/text_primary"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtItemCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 items"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="20sp" />
+
+            </LinearLayout>
+
+            <!-- CATEGORY BUTTONS ROW 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="0 items"
-                android:textColor="@color/text_secondary"
-                android:textSize="20sp" />
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
 
-        </LinearLayout>
+                <!-- ALL -->
+                <Button
+                    android:id="@+id/btnAll"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/primary_green"
+                    android:text="All"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-        <!-- CATEGORY BUTTONS ROW 1 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:orientation="horizontal">
+                <Space
+                    android:layout_width="12dp"
+                    android:layout_height="1dp" />
 
-            <!-- ALL -->
+                <!-- FRESH -->
+                <Button
+                    android:id="@+id/btnFresh"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/accent_green_light"
+                    android:text="Fresh"
+                    android:textColor="@color/text_green_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- CATEGORY BUTTONS ROW 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <!-- DRY GOODS -->
+                <Button
+                    android:id="@+id/btnDryGoods"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/accent_green_light"
+                    android:text="Dry Goods"
+                    android:textColor="@color/text_green_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="12dp"
+                    android:layout_height="1dp" />
+
+                <!-- DAIRY -->
+                <Button
+                    android:id="@+id/btnDairy"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/accent_green_light"
+                    android:text="Dairy"
+                    android:textColor="@color/text_green_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- RECIPES BUTTON -->
             <Button
-                android:id="@+id/btnAll"
-                android:layout_width="0dp"
+                android:id="@+id/btnRecipes"
+                android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/primary_green"
-                android:text="All"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/primary_green_dark"
+                android:text="🍳  Recipes"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <Space
-                android:layout_width="12dp"
-                android:layout_height="1dp" />
-
-            <!-- FRESH -->
-            <Button
-                android:id="@+id/btnFresh"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/accent_green_light"
-                android:text="Fresh"
-                android:textColor="@color/text_green_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- CATEGORY BUTTONS ROW 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <!-- DRY GOODS -->
-            <Button
-                android:id="@+id/btnDryGoods"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/accent_green_light"
-                android:text="Dry Goods"
-                android:textColor="@color/text_green_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <Space
-                android:layout_width="12dp"
-                android:layout_height="1dp" />
-
-            <!-- DAIRY -->
-            <Button
-                android:id="@+id/btnDairy"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:backgroundTint="@color/accent_green_light"
-                android:text="Dairy"
-                android:textColor="@color/text_green_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <!-- RECIPES BUTTON -->
-        <Button
-            android:id="@+id/btnRecipes"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="@color/primary_green_dark"
-            android:text="🍳  Recipes"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <!-- INGREDIENT LIST SCROLLABLE BLOCK -->
-        <FrameLayout
-            android:id="@+id/ingredientContainer"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_marginTop="20dp">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewIngredients"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:nestedScrollingEnabled="true"
-                android:overScrollMode="always" />
-
-        </FrameLayout>
-
-        <!-- EMPTY STATE -->
-        <LinearLayout
-            android:id="@+id/emptyState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="80dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🥕"
-                android:textSize="72sp" />
-
-            <TextView
-                android:id="@+id/txtEmptyTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Your pantry is empty"
-                android:textColor="@color/text_primary"
-                android:textSize="28sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtEmptyMessage"
+            <!-- INGREDIENT LIST SCROLLABLE BLOCK -->
+            <FrameLayout
+                android:id="@+id/ingredientContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="20dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewIngredients"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+
+            </FrameLayout>
+
+            <!-- EMPTY STATE -->
+            <LinearLayout
+                android:id="@+id/emptyState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
                 android:gravity="center"
-                android:text="Add your first ingredient to start managing your pantry."
-                android:textColor="@color/text_secondary"
-                android:textSize="19sp" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🥕"
+                    android:textSize="72sp" />
+
+                <TextView
+                    android:id="@+id/txtEmptyTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Your pantry is empty"
+                    android:textColor="@color/text_primary"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtEmptyMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:text="Add your first ingredient to start managing your pantry."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="19sp" />
+
+            </LinearLayout>
+
+            <!-- ADD INGREDIENT -->
+            <Button
+                android:id="@+id/btnAddIngredient"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/primary_green"
+                android:text="+  Add Ingredient"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
-        <!-- ADD INGREDIENT -->
-        <Button
-            android:id="@+id/btnAddIngredient"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="40dp"
-            android:layout_marginBottom="20dp"
-            android:backgroundTint="@color/primary_green"
-            android:text="+  Add Ingredient"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+    </ScrollView>
 
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>
