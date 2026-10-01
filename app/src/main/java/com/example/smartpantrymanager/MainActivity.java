@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
 
+    private View ingredientContainer;
     private RecyclerView recyclerViewIngredients;
     private IngredientAdapter ingredientAdapter;
     private final List<IngredientModel> ingredientList = new ArrayList<>();
@@ -69,8 +70,10 @@ public class MainActivity extends AppCompatActivity {
 
         databaseHelper = new DatabaseHelper(this);
 
+        ingredientContainer = findViewById(R.id.ingredientContainer);
         recyclerViewIngredients = findViewById(R.id.recyclerViewIngredients);
         recyclerViewIngredients.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewIngredients.setNestedScrollingEnabled(true);
 
         ingredientAdapter = new IngredientAdapter(this, ingredientList, new IngredientAdapter.OnItemClickListener() {
             @Override
@@ -301,8 +304,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (displayedItems == 0) {
             emptyState.setVisibility(View.VISIBLE);
+            if (ingredientContainer != null) {
+                ingredientContainer.setVisibility(View.GONE);
+            }
         } else {
             emptyState.setVisibility(View.GONE);
+            if (ingredientContainer != null) {
+                ingredientContainer.setVisibility(View.VISIBLE);
+            }
         }
     }
 

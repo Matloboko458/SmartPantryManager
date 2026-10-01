@@ -230,13 +230,21 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <!-- INGREDIENT LIST -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewIngredients"
+        <!-- INGREDIENT LIST SCROLLABLE BLOCK -->
+        <FrameLayout
+            android:id="@+id/ingredientContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:nestedScrollingEnabled="false" />
+            android:layout_height="320dp"
+            android:layout_marginTop="20dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewIngredients"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:nestedScrollingEnabled="true"
+                android:overScrollMode="always" />
+
+        </FrameLayout>
 
         <!-- EMPTY STATE -->
         <LinearLayout
