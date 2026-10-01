@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         databaseHelper = new DatabaseHelper(this);
+        databaseHelper.seedInitialIngredientsIfEmpty();
 
         ingredientContainer = findViewById(R.id.ingredientContainer);
         recyclerViewIngredients = findViewById(R.id.recyclerViewIngredients);
