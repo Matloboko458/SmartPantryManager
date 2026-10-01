@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F8FAFA"
+    android:background="@color/bg_color"
     android:fitsSystemWindows="true">
 
     <LinearLayout
@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Add Ingredient"
-            android:textColor="#111111"
+            android:textColor="@color/text_primary"
             android:textSize="40sp"
             android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="Add an ingredient to your pantry."
-            android:textColor="#777777"
+            android:textColor="@color/text_secondary"
             android:textSize="20sp" />
 
         <TextView
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="48dp"
             android:text="Ingredient Name"
-            android:textColor="#222222"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -45,12 +45,12 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:hint="e.g. Eggs"
             android:inputType="text"
             android:padding="12dp"
-            android:textColor="#222222"
-            android:textColorHint="#999999"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
             android:textSize="20sp"
             android:singleLine="true" />
 
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Quantity"
-            android:textColor="#222222"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -68,12 +68,12 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:hint="e.g. 12"
             android:inputType="numberDecimal"
             android:padding="12dp"
-            android:textColor="#222222"
-            android:textColorHint="#999999"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
             android:textSize="20sp"
             android:singleLine="true" />
 
@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Unit"
-            android:textColor="#222222"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -91,12 +91,12 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:hint="e.g. pieces, kg, liters"
             android:inputType="text"
             android:padding="12dp"
-            android:textColor="#222222"
-            android:textColorHint="#999999"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
             android:textSize="20sp"
             android:singleLine="true" />
 
@@ -105,7 +105,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Expiry Date"
-            android:textColor="#222222"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -114,13 +114,13 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:hint="DD/MM/YYYY"
             android:inputType="number"
             android:maxLength="10"
             android:padding="12dp"
-            android:textColor="#222222"
-            android:textColorHint="#999999"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_hint"
             android:textSize="20sp"
             android:singleLine="true" />
 
@@ -130,7 +130,7 @@
             android:layout_height="64dp"
             android:layout_marginTop="40dp"
             android:layout_marginBottom="40dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:text="Save Ingredient"
             android:textColor="#FFFFFF"
             android:textSize="20sp"

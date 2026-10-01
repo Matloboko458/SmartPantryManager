@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -16,14 +17,25 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String PREF_NAME = "SmartPantryPrefs";
     private static final String KEY_NOTIFICATIONS = "notifications_enabled";
     private static final String KEY_EXPIRY_REMINDERS = "expiry_reminders_enabled";
+    private static final String KEY_DARK_MODE = "dark_mode";
 
     private SwitchCompat switchNotifications;
     private SwitchCompat switchExpiryReminders;
+    private SwitchCompat switchDarkMode;
     private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        boolean isDarkMode = prefs.getBoolean(KEY_DARK_MODE, false);
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         setContentView(R.layout.activity_settings);
 
         databaseHelper = new DatabaseHelper(this);
@@ -35,10 +47,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         switchNotifications = findViewById(R.id.switchNotifications);
         switchExpiryReminders = findViewById(R.id.switchExpiryReminders);
+        switchDarkMode = findViewById(R.id.switchDarkMode);
 
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         switchNotifications.setChecked(prefs.getBoolean(KEY_NOTIFICATIONS, true));
         switchExpiryReminders.setChecked(prefs.getBoolean(KEY_EXPIRY_REMINDERS, true));
+        switchDarkMode.setChecked(isDarkMode);
 
         switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean(KEY_NOTIFICATIONS, isChecked).apply();
@@ -48,6 +61,16 @@ public class SettingsActivity extends AppCompatActivity {
         switchExpiryReminders.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean(KEY_EXPIRY_REMINDERS, isChecked).apply();
             Toast.makeText(this, "Expiry Reminders " + (isChecked ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
+        });
+
+        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            prefs.edit().putBoolean(KEY_DARK_MODE, isChecked).apply();
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+            Toast.makeText(this, "Dark Mode " + (isChecked ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
         });
 
         btnBack.setOnClickListener(v -> finish());

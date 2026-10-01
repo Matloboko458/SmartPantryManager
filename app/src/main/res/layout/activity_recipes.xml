@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F8FAFA">
+    android:background="@color/bg_color">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,9 +24,9 @@
                 android:id="@+id/btnBack"
                 android:layout_width="145dp"
                 android:layout_height="56dp"
-                android:backgroundTint="#81C784"
+                android:backgroundTint="@color/accent_green_light"
                 android:text="←  Back"
-                android:textColor="#1B5E20"
+                android:textColor="@color/text_green_dark"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -36,7 +36,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
                 android:text="Recipes"
-                android:textColor="#111111"
+                android:textColor="@color/text_primary"
                 android:textSize="40sp"
                 android:textStyle="bold" />
 
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="Recipes you can make with everyday ingredients"
-            android:textColor="#666666"
+            android:textColor="@color/text_secondary"
             android:textSize="20sp" />
 
         <!-- FILTER SPINNER -->
@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="Suggested Recipes"
-            android:textColor="#111111"
+            android:textColor="@color/text_primary"
             android:textSize="30sp"
             android:textStyle="bold" />
 
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="Tap View Recipe to see ingredients and instructions."
-            android:textColor="#777777"
+            android:textColor="@color/text_secondary"
             android:textSize="18sp" />
 
         <!-- RECIPES ARE ADDED HERE BY JAVA -->
@@ -94,7 +94,7 @@
             android:layout_height="64dp"
             android:layout_marginTop="32dp"
             android:layout_marginBottom="20dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:text="+  Add Recipe"
             android:textColor="#FFFFFF"
             android:textSize="20sp"

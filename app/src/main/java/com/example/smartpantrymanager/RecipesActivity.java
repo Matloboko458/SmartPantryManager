@@ -11,29 +11,25 @@ import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.ArrayAdapter;
-import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 public class RecipesActivity extends AppCompatActivity {
 
@@ -42,11 +38,11 @@ public class RecipesActivity extends AppCompatActivity {
     private Spinner recipeFilterSpinner;
     private String currentRecipeFilter = "Suggested Recipes";
 
-    private final List<PantryItem> pantryItems =
-            new ArrayList<>();
+    private final List<PantryItem> pantryItems = new ArrayList<>();
+    private static final List<Recipe> recipes = new ArrayList<>();
 
-    private static final List<Recipe> recipes =
-            new ArrayList<>();
+    private static final String PREF_NAME = "SmartPantryPrefs";
+    private static final String KEY_CUSTOM_RECIPES = "custom_recipes_json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,27 +50,20 @@ public class RecipesActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_recipes);
 
-        databaseHelper =
-                new DatabaseHelper(this);
+        databaseHelper = new DatabaseHelper(this);
 
-        recipeContainer =
-                findViewById(R.id.recipeContainer);
+        recipeContainer = findViewById(R.id.recipeContainer);
 
-        Button btnBack =
-                findViewById(R.id.btnBack);
+        Button btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(view -> finish());
 
-        btnBack.setOnClickListener(
-                view -> finish()
-        );
-
-        Button btnAddRecipe =
-                findViewById(R.id.btnAddRecipe);
-
-        btnAddRecipe.setOnClickListener(
-                view -> showAddRecipeDialog()
-        );
+        Button btnAddRecipe = findViewById(R.id.btnAddRecipe);
+        btnAddRecipe.setOnClickListener(view -> showAddRecipeDialog());
 
         recipeFilterSpinner = findViewById(R.id.recipeFilterSpinner);
+
+        int textPrimary = ContextCompat.getColor(this, R.color.text_primary);
+        int cardBg = ContextCompat.getColor(this, R.color.card_bg);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
                 this,
@@ -85,7 +74,7 @@ public class RecipesActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView tv = (TextView) view;
-                tv.setTextColor(Color.BLACK);
+                tv.setTextColor(textPrimary);
                 return view;
             }
 
@@ -93,7 +82,8 @@ public class RecipesActivity extends AppCompatActivity {
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
                 TextView tv = (TextView) view;
-                tv.setTextColor(Color.BLACK);
+                tv.setTextColor(textPrimary);
+                tv.setBackgroundColor(cardBg);
                 return view;
             }
         };
@@ -113,23 +103,18 @@ public class RecipesActivity extends AppCompatActivity {
         });
 
         createRecipes();
-
         loadRecipes();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (databaseHelper != null &&
-                recipeContainer != null) {
-
+        if (databaseHelper != null && recipeContainer != null) {
             loadRecipes();
         }
     }
 
     private void createRecipes() {
-
         if (!recipes.isEmpty()) {
             return;
         }
@@ -493,9 +478,6 @@ public class RecipesActivity extends AppCompatActivity {
         loadCustomRecipes();
     }
 
-    private static final String PREF_NAME = "SmartPantryPrefs";
-    private static final String KEY_CUSTOM_RECIPES = "custom_recipes_json";
-
     private void saveCustomRecipe(Recipe recipe) {
         try {
             SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
@@ -574,44 +556,63 @@ public class RecipesActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(40, 20, 40, 10);
 
+        int textPrimary = ContextCompat.getColor(this, R.color.text_primary);
+        int textHint = ContextCompat.getColor(this, R.color.text_hint);
+
         final EditText nameInput = new EditText(this);
         nameInput.setHint("Recipe Name");
+        nameInput.setHintTextColor(textHint);
+        nameInput.setTextColor(textPrimary);
         nameInput.setSingleLine(true);
         layout.addView(nameInput);
 
         final EditText descInput = new EditText(this);
         descInput.setHint("Description");
+        descInput.setHintTextColor(textHint);
+        descInput.setTextColor(textPrimary);
         descInput.setSingleLine(true);
         layout.addView(descInput);
 
         final EditText timeInput = new EditText(this);
         timeInput.setHint("Cooking Time (e.g., 15 minutes)");
+        timeInput.setHintTextColor(textHint);
+        timeInput.setTextColor(textPrimary);
         timeInput.setSingleLine(true);
         layout.addView(timeInput);
 
         final EditText diffInput = new EditText(this);
         diffInput.setHint("Difficulty (Easy / Medium / Hard)");
+        diffInput.setHintTextColor(textHint);
+        diffInput.setTextColor(textPrimary);
         diffInput.setSingleLine(true);
         layout.addView(diffInput);
 
         final EditText ingNameInput = new EditText(this);
         ingNameInput.setHint("Main Required Ingredient (e.g., egg)");
+        ingNameInput.setHintTextColor(textHint);
+        ingNameInput.setTextColor(textPrimary);
         ingNameInput.setSingleLine(true);
         layout.addView(ingNameInput);
 
         final EditText ingQtyInput = new EditText(this);
         ingQtyInput.setHint("Ingredient Quantity (e.g., 2)");
+        ingQtyInput.setHintTextColor(textHint);
+        ingQtyInput.setTextColor(textPrimary);
         ingQtyInput.setSingleLine(true);
         ingQtyInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         layout.addView(ingQtyInput);
 
         final EditText ingUnitInput = new EditText(this);
         ingUnitInput.setHint("Ingredient Unit (e.g., piece, g, ml)");
+        ingUnitInput.setHintTextColor(textHint);
+        ingUnitInput.setTextColor(textPrimary);
         ingUnitInput.setSingleLine(true);
         layout.addView(ingUnitInput);
 
         final EditText instInput = new EditText(this);
         instInput.setHint("Instructions (e.g., 1. Cook... 2. Serve)");
+        instInput.setHintTextColor(textHint);
+        instInput.setTextColor(textPrimary);
         layout.addView(instInput);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -650,7 +651,6 @@ public class RecipesActivity extends AppCompatActivity {
     }
 
     private void loadRecipes() {
-
         loadPantryIngredients();
 
         if (recipeContainer == null) {
@@ -662,7 +662,6 @@ public class RecipesActivity extends AppCompatActivity {
         int displayedRecipeCount = 0;
 
         for (Recipe recipe : recipes) {
-
             boolean shouldShow = false;
 
             if (currentRecipeFilter != null && currentRecipeFilter.equals("All Recipes")) {
@@ -672,18 +671,13 @@ public class RecipesActivity extends AppCompatActivity {
             }
 
             if (shouldShow) {
-
                 addRecipe(recipe);
-
                 displayedRecipeCount++;
             }
         }
 
         if (displayedRecipeCount == 0) {
-
-            TextView emptyText =
-                    new TextView(this);
-
+            TextView emptyText = new TextView(this);
             emptyText.setText(
                     currentRecipeFilter != null && currentRecipeFilter.equals("All Recipes")
                             ? "No recipes available."
@@ -692,106 +686,43 @@ public class RecipesActivity extends AppCompatActivity {
             );
 
             emptyText.setTextSize(19);
-            emptyText.setTextColor(
-                    Color.rgb(100, 100, 100)
-            );
+            emptyText.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            emptyText.setGravity(Gravity.CENTER);
+            emptyText.setPadding(30, 80, 30, 80);
 
-            emptyText.setGravity(
-                    Gravity.CENTER
-            );
-
-            emptyText.setPadding(
-                    30,
-                    80,
-                    30,
-                    80
-            );
-
-            recipeContainer.addView(
-                    emptyText
-            );
+            recipeContainer.addView(emptyText);
         }
     }
 
     private void loadPantryIngredients() {
-
         pantryItems.clear();
-
         Cursor cursor = null;
 
         try {
+            cursor = databaseHelper.getAllIngredients();
 
-            cursor =
-                    databaseHelper.getAllIngredients();
-
-            if (cursor != null &&
-                    cursor.moveToFirst()) {
-
+            if (cursor != null && cursor.moveToFirst()) {
                 do {
+                    int idIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_ID);
+                    int nameIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_NAME);
+                    int quantityIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_QUANTITY);
+                    int unitIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_UNIT);
 
-                    int idIndex =
-                            cursor.getColumnIndex(
-                                    DatabaseHelper.COLUMN_ID
-                            );
+                    if (nameIndex >= 0 && quantityIndex >= 0 && unitIndex >= 0) {
+                        long id = idIndex >= 0 ? cursor.getLong(idIndex) : 0;
+                        String name = cursor.getString(nameIndex);
+                        String quantity = cursor.getString(quantityIndex);
+                        String unit = cursor.getString(unitIndex);
 
-                    int nameIndex =
-                            cursor.getColumnIndex(
-                                    DatabaseHelper.COLUMN_NAME
-                            );
-
-                    int quantityIndex =
-                            cursor.getColumnIndex(
-                                    DatabaseHelper.COLUMN_QUANTITY
-                            );
-
-                    int unitIndex =
-                            cursor.getColumnIndex(
-                                    DatabaseHelper.COLUMN_UNIT
-                            );
-
-                    if (nameIndex >= 0 &&
-                            quantityIndex >= 0 &&
-                            unitIndex >= 0) {
-
-                        long id =
-                                idIndex >= 0
-                                        ? cursor.getLong(idIndex)
-                                        : 0;
-
-                        String name =
-                                cursor.getString(
-                                        nameIndex
-                                );
-
-                        String quantity =
-                                cursor.getString(
-                                        quantityIndex
-                                );
-
-                        String unit =
-                                cursor.getString(
-                                        unitIndex
-                                );
-
-                        pantryItems.add(
-                                new PantryItem(
-                                        id,
-                                        name,
-                                        parseQuantity(quantity),
-                                        unit
-                                )
-                        );
+                        pantryItems.add(new PantryItem(id, name, parseQuantity(quantity), unit));
                     }
 
                 } while (cursor.moveToNext());
             }
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
         } finally {
-
             if (cursor != null) {
                 cursor.close();
             }
@@ -799,55 +730,34 @@ public class RecipesActivity extends AppCompatActivity {
     }
 
     private double parseQuantity(String value) {
-
         if (value == null) {
             return 0;
         }
 
-        String cleaned =
-                value.trim()
-                        .replace(",", ".");
+        String cleaned = value.trim().replace(",", ".");
 
         try {
-
-            return Double.parseDouble(
-                    cleaned
-            );
-
+            return Double.parseDouble(cleaned);
         } catch (Exception e) {
-
             return 0;
         }
     }
 
     private boolean canMakeRecipe(Recipe recipe) {
-
-        for (RequiredIngredient required :
-                recipe.requiredIngredients) {
-
+        for (RequiredIngredient required : recipe.requiredIngredients) {
             boolean ingredientFound = false;
 
-            for (PantryItem pantry :
-                    pantryItems) {
+            for (PantryItem pantry : pantryItems) {
+                if (ingredientMatches(pantry.name, required.name)) {
+                    double pantryAmount = convertToBaseUnit(
+                            pantry.quantity,
+                            pantry.unit,
+                            required.unit
+                    );
 
-                if (ingredientMatches(
-                        pantry.name,
-                        required.name
-                )) {
+                    double requiredAmount = required.quantity;
 
-                    double pantryAmount =
-                            convertToBaseUnit(
-                                    pantry.quantity,
-                                    pantry.unit,
-                                    required.unit
-                            );
-
-                    double requiredAmount =
-                            required.quantity;
-
-                    if (pantryAmount >=
-                            requiredAmount) {
-
+                    if (pantryAmount >= requiredAmount) {
                         ingredientFound = true;
                         break;
                     }
@@ -862,26 +772,13 @@ public class RecipesActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean ingredientMatches(
-            String pantryName,
-            String requiredName
-    ) {
-
-        if (pantryName == null ||
-                requiredName == null) {
-
+    private boolean ingredientMatches(String pantryName, String requiredName) {
+        if (pantryName == null || requiredName == null) {
             return false;
         }
 
-        String pantry =
-                normaliseIngredient(
-                        pantryName
-                );
-
-        String required =
-                normaliseIngredient(
-                        requiredName
-                );
+        String pantry = normaliseIngredient(pantryName);
+        String required = normaliseIngredient(requiredName);
 
         if (pantry.equals(required)) {
             return true;
@@ -898,80 +795,37 @@ public class RecipesActivity extends AppCompatActivity {
         return false;
     }
 
-    private String normaliseIngredient(
-            String value
-    ) {
-
-        String result =
-                value.toLowerCase(
-                        Locale.US
-                ).trim();
-
-        result =
-                result.replace(
-                        "-", " "
-                );
-
-        result =
-                result.replaceAll(
-                        "\\s+",
-                        " "
-                );
+    private String normaliseIngredient(String value) {
+        String result = value.toLowerCase(Locale.US).trim();
+        result = result.replace("-", " ");
+        result = result.replaceAll("\\s+", " ");
 
         if (result.endsWith("ies")) {
-
-            result =
-                    result.substring(
-                            0,
-                            result.length() - 3
-                    ) + "y";
-
+            result = result.substring(0, result.length() - 3) + "y";
         } else if (result.endsWith("oes")) {
-
-            result =
-                    result.substring(
-                            0,
-                            result.length() - 2
-                    );
-
-        } else if (result.endsWith("s") &&
-                !result.endsWith("ss")) {
-
-            result =
-                    result.substring(
-                            0,
-                            result.length() - 1
-                    );
+            result = result.substring(0, result.length() - 2);
+        } else if (result.endsWith("s") && !result.endsWith("ss")) {
+            result = result.substring(0, result.length() - 1);
         }
 
         return result;
     }
 
-    private double convertToBaseUnit(
-            double quantity,
-            String pantryUnit,
-            String requiredUnit
-    ) {
-
-        String pantry =
-                normaliseUnit(pantryUnit);
-
-        String required =
-                normaliseUnit(requiredUnit);
+    private double convertToBaseUnit(double quantity, String pantryUnit, String requiredUnit) {
+        String pantry = normaliseUnit(pantryUnit);
+        String required = normaliseUnit(requiredUnit);
 
         if (pantry.equals(required)) {
             return quantity;
         }
 
         if (required.equals("g")) {
-
             if (pantry.equals("kg")) {
                 return quantity * 1000;
             }
         }
 
         if (required.equals("ml")) {
-
             if (pantry.equals("l")) {
                 return quantity * 1000;
             }
@@ -1004,47 +858,30 @@ public class RecipesActivity extends AppCompatActivity {
         return quantity;
     }
 
-    private String normaliseUnit(
-            String unit
-    ) {
-
+    private String normaliseUnit(String unit) {
         if (unit == null) {
             return "";
         }
 
-        String result =
-                unit.toLowerCase(
-                        Locale.US
-                ).trim();
+        String result = unit.toLowerCase(Locale.US).trim();
 
-        if (result.equals("grams") ||
-                result.equals("gram")) {
+        if (result.equals("grams") || result.equals("gram")) {
             return "g";
         }
 
-        if (result.equals("kilograms") ||
-                result.equals("kilogram") ||
-                result.equals("kgs")) {
+        if (result.equals("kilograms") || result.equals("kilogram") || result.equals("kgs")) {
             return "kg";
         }
 
-        if (result.equals("millilitres") ||
-                result.equals("milliliters") ||
-                result.equals("millilitre") ||
-                result.equals("milliliter")) {
+        if (result.equals("millilitres") || result.equals("milliliters") || result.equals("millilitre") || result.equals("milliliter")) {
             return "ml";
         }
 
-        if (result.equals("litres") ||
-                result.equals("liters") ||
-                result.equals("litre") ||
-                result.equals("liter")) {
+        if (result.equals("litres") || result.equals("liters") || result.equals("litre") || result.equals("liter")) {
             return "l";
         }
 
-        if (result.equals("pieces") ||
-                result.equals("pcs") ||
-                result.equals("pc")) {
+        if (result.equals("pieces") || result.equals("pcs") || result.equals("pc")) {
             return "piece";
         }
 
@@ -1067,329 +904,117 @@ public class RecipesActivity extends AppCompatActivity {
         return result;
     }
 
-    private void addRecipe(
-            Recipe recipe
-    ) {
+    private void addRecipe(Recipe recipe) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(24, 24, 24, 24);
 
-        LinearLayout card =
-                new LinearLayout(this);
+        int cardBg = ContextCompat.getColor(this, R.color.card_bg);
+        int cardStroke = ContextCompat.getColor(this, R.color.card_stroke);
+        int textPrimary = ContextCompat.getColor(this, R.color.text_primary);
+        int textSecondary = ContextCompat.getColor(this, R.color.text_secondary);
+        int primaryGreenDark = ContextCompat.getColor(this, R.color.primary_green_dark);
 
-        card.setOrientation(
-                LinearLayout.VERTICAL
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(cardBg);
+        background.setCornerRadius(24);
+        background.setStroke(2, cardStroke);
+
+        card.setBackground(background);
+
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
+        cardParams.setMargins(0, 0, 0, 20);
+        card.setLayoutParams(cardParams);
 
-        card.setPadding(
-                24,
-                24,
-                24,
-                24
+        TextView title = new TextView(this);
+        title.setText(recipe.name);
+        title.setTextColor(textPrimary);
+        title.setTextSize(23);
+        title.setTypeface(null, Typeface.BOLD);
+        card.addView(title);
+
+        TextView description = new TextView(this);
+        description.setText(recipe.description);
+        description.setTextColor(textSecondary);
+        description.setTextSize(16);
+
+        LinearLayout.LayoutParams descriptionParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
+        descriptionParams.setMargins(0, 10, 0, 12);
+        description.setLayoutParams(descriptionParams);
+        card.addView(description);
 
-        GradientDrawable background =
-                new GradientDrawable();
+        TextView ingredients = new TextView(this);
+        ingredients.setText("Required ingredients:\n" + getIngredientList(recipe));
+        ingredients.setTextColor(textSecondary);
+        ingredients.setTextSize(16);
+        card.addView(ingredients);
 
-        background.setColor(
-                Color.WHITE
+        TextView time = new TextView(this);
+        time.setText("Cooking time: " + recipe.cookingTime + "     Difficulty: " + recipe.difficulty);
+        time.setTextColor(textSecondary);
+        time.setTextSize(15);
+
+        LinearLayout.LayoutParams timeParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
+        timeParams.setMargins(0, 12, 0, 12);
+        time.setLayoutParams(timeParams);
+        card.addView(time);
 
-        background.setCornerRadius(
-                24
-        );
+        Button viewRecipeButton = new Button(this);
+        viewRecipeButton.setText("View Recipe");
+        viewRecipeButton.setTextSize(16);
+        viewRecipeButton.setAllCaps(false);
+        viewRecipeButton.setTextColor(Color.WHITE);
+        viewRecipeButton.setBackgroundTintList(ColorStateList.valueOf(primaryGreenDark));
+        viewRecipeButton.setOnClickListener(view -> showRecipeDetails(recipe));
 
-        background.setStroke(
-                2,
-                Color.rgb(
-                        225,
-                        225,
-                        225
-                )
-        );
-
-        card.setBackground(
-                background
-        );
-
-        LinearLayout.LayoutParams cardParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        cardParams.setMargins(
-                0,
-                0,
-                0,
-                20
-        );
-
-        card.setLayoutParams(
-                cardParams
-        );
-
-        TextView title =
-                new TextView(this);
-
-        title.setText(
-                recipe.name
-        );
-
-        title.setTextColor(
-                Color.rgb(
-                        17,
-                        17,
-                        17
-                )
-        );
-
-        title.setTextSize(
-                23
-        );
-
-        title.setTypeface(
-                null,
-                Typeface.BOLD
-        );
-
-        card.addView(
-                title
-        );
-
-        TextView description =
-                new TextView(this);
-
-        description.setText(
-                recipe.description
-        );
-
-        description.setTextColor(
-                Color.rgb(
-                        90,
-                        90,
-                        90
-                )
-        );
-
-        description.setTextSize(
-                16
-        );
-
-        LinearLayout.LayoutParams descriptionParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        descriptionParams.setMargins(
-                0,
-                10,
-                0,
-                12
-        );
-
-        description.setLayoutParams(
-                descriptionParams
-        );
-
-        card.addView(
-                description
-        );
-
-        TextView ingredients =
-                new TextView(this);
-
-        ingredients.setText(
-                "Required ingredients:\n"
-                        + getIngredientList(
-                        recipe
-                )
-        );
-
-        ingredients.setTextColor(
-                Color.rgb(
-                        70,
-                        70,
-                        70
-                )
-        );
-
-        ingredients.setTextSize(
-                16
-        );
-
-        card.addView(
-                ingredients
-        );
-
-        TextView time =
-                new TextView(this);
-
-        time.setText(
-                "Cooking time: "
-                        + recipe.cookingTime
-                        + "     Difficulty: "
-                        + recipe.difficulty
-        );
-
-        time.setTextColor(
-                Color.rgb(
-                        90,
-                        90,
-                        90
-                )
-        );
-
-        time.setTextSize(
-                15
-        );
-
-        LinearLayout.LayoutParams timeParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-
-        timeParams.setMargins(
-                0,
-                12,
-                0,
-                12
-        );
-
-        time.setLayoutParams(
-                timeParams
-        );
-
-        card.addView(
-                time
-        );
-
-        Button viewRecipeButton =
-                new Button(this);
-
-        viewRecipeButton.setText(
-                "View Recipe"
-        );
-
-        viewRecipeButton.setTextSize(
-                16
-        );
-
-        viewRecipeButton.setAllCaps(
-                false
-        );
-
-        viewRecipeButton.setTextColor(
-                Color.WHITE
-        );
-
-        viewRecipeButton.setBackgroundTintList(
-                ColorStateList.valueOf(
-                        Color.rgb(
-                                56,
-                                142,
-                                60
-                        )
-                )
-        );
-
-        viewRecipeButton.setOnClickListener(
-                view ->
-                        showRecipeDetails(
-                                recipe
-                        )
-        );
-
-        card.addView(
-                viewRecipeButton
-        );
-
-        recipeContainer.addView(
-                card
-        );
+        card.addView(viewRecipeButton);
+        recipeContainer.addView(card);
     }
 
-    private String getIngredientList(
-            Recipe recipe
-    ) {
+    private String getIngredientList(Recipe recipe) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < recipe.requiredIngredients.length; i++) {
+            RequiredIngredient ingredient = recipe.requiredIngredients[i];
+            result.append("• ").append(ingredient.quantity).append(" ")
+                    .append(ingredient.unit).append(" ").append(ingredient.name);
 
-        StringBuilder result =
-                new StringBuilder();
-
-        for (int i = 0;
-             i < recipe.requiredIngredients.length;
-             i++) {
-
-            RequiredIngredient ingredient =
-                    recipe.requiredIngredients[i];
-
-            result.append(
-                    "• "
-                            + ingredient.quantity
-                            + " "
-                            + ingredient.unit
-                            + " "
-                            + ingredient.name
-            );
-
-            if (i <
-                    recipe.requiredIngredients.length - 1) {
-
+            if (i < recipe.requiredIngredients.length - 1) {
                 result.append("\n");
             }
         }
-
         return result.toString();
     }
 
-    private void showRecipeDetails(
-            Recipe recipe
-    ) {
-
-        String message =
-                recipe.description
-                        + "\n\n"
-                        + "Ingredients:\n"
-                        + getIngredientList(
-                        recipe
-                )
-                        + "\n\n"
-                        + "Cooking Time: "
-                        + recipe.cookingTime
-                        + "\n"
-                        + "Difficulty: "
-                        + recipe.difficulty
-                        + "\n\n"
-                        + "Instructions:\n"
-                        + recipe.instructions;
+    private void showRecipeDetails(Recipe recipe) {
+        String message = recipe.description
+                + "\n\nIngredients:\n" + getIngredientList(recipe)
+                + "\n\nCooking Time: " + recipe.cookingTime
+                + "\nDifficulty: " + recipe.difficulty
+                + "\n\nInstructions:\n" + recipe.instructions;
 
         new AlertDialog.Builder(this)
-                .setTitle(
-                        recipe.name
-                )
-                .setMessage(
-                        message
-                )
-                .setPositiveButton(
-                        "Close",
-                        null
-                )
+                .setTitle(recipe.name)
+                .setMessage(message)
+                .setPositiveButton("Close", null)
                 .show();
     }
 
     private static class PantryItem {
-
         long id;
         String name;
         double quantity;
         String unit;
 
-        PantryItem(
-                long id,
-                String name,
-                double quantity,
-                String unit
-        ) {
-
+        PantryItem(long id, String name, double quantity, String unit) {
             this.id = id;
             this.name = name;
             this.quantity = quantity;
@@ -1398,17 +1023,11 @@ public class RecipesActivity extends AppCompatActivity {
     }
 
     private static class RequiredIngredient {
-
         String name;
         double quantity;
         String unit;
 
-        RequiredIngredient(
-                String name,
-                double quantity,
-                String unit
-        ) {
-
+        RequiredIngredient(String name, double quantity, String unit) {
             this.name = name;
             this.quantity = quantity;
             this.unit = unit;
@@ -1416,7 +1035,6 @@ public class RecipesActivity extends AppCompatActivity {
     }
 
     private static class Recipe {
-
         String name;
         String cookingTime;
         String difficulty;
@@ -1424,21 +1042,12 @@ public class RecipesActivity extends AppCompatActivity {
         RequiredIngredient[] requiredIngredients;
         String instructions;
 
-        Recipe(
-                String name,
-                String cookingTime,
-                String difficulty,
-                String description,
-                RequiredIngredient[] requiredIngredients,
-                String instructions
-        ) {
-
+        Recipe(String name, String cookingTime, String difficulty, String description, RequiredIngredient[] requiredIngredients, String instructions) {
             this.name = name;
             this.cookingTime = cookingTime;
             this.difficulty = difficulty;
             this.description = description;
-            this.requiredIngredients =
-                    requiredIngredients;
+            this.requiredIngredients = requiredIngredients;
             this.instructions = instructions;
         }
     }

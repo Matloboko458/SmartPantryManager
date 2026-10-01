@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F8FAFA">
+    android:background="@color/bg_color">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,9 +23,9 @@
                 android:id="@+id/btnBack"
                 android:layout_width="145dp"
                 android:layout_height="56dp"
-                android:backgroundTint="#81C784"
+                android:backgroundTint="@color/accent_green_light"
                 android:text="←  Back"
-                android:textColor="#1B5E20"
+                android:textColor="@color/text_green_dark"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
                 android:text="User Profile"
-                android:textColor="#111111"
+                android:textColor="@color/text_primary"
                 android:textSize="36sp"
                 android:textStyle="bold" />
 
@@ -55,7 +55,7 @@
                 android:id="@+id/imgProfile"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
-                android:background="#E8F5E9"
+                android:background="@color/profile_image_bg"
                 android:contentDescription="Profile Picture"
                 android:scaleType="centerCrop"
                 android:clickable="true"
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Tap picture to change"
-                android:textColor="#388E3C"
+                android:textColor="@color/primary_green_dark"
                 android:textSize="14sp" />
 
             <TextView
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="John Doe"
-                android:textColor="#111111"
+                android:textColor="@color/text_primary"
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="john.doe@example.com"
-                android:textColor="#666666"
+                android:textColor="@color/text_secondary"
                 android:textSize="18sp" />
 
         </LinearLayout>
@@ -103,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Pantry Summary"
-                android:textColor="#111111"
+                android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Total Items in Pantry: 0"
-                android:textColor="#555555"
+                android:textColor="@color/text_secondary"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -123,7 +123,7 @@
             android:layout_width="match_parent"
             android:layout_height="64dp"
             android:layout_marginTop="32dp"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/primary_green"
             android:text="Edit Profile"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
