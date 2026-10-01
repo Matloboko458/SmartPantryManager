@@ -1,15 +1,19 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,11 +22,15 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String PREF_NAME = "SmartPantryPrefs";
     private static final String KEY_NAME = "user_name";
     private static final String KEY_EMAIL = "user_email";
+    private static final String KEY_PROFILE_IMAGE = "profile_image_uri";
 
     private TextView txtProfileName;
     private TextView txtProfileEmail;
     private TextView txtPantryInfoCount;
+    private ImageView imgProfile;
     private DatabaseHelper databaseHelper;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +45,39 @@ public class ProfileActivity extends AppCompatActivity {
         txtProfileName = findViewById(R.id.txtProfileName);
         txtProfileEmail = findViewById(R.id.txtProfileEmail);
         txtPantryInfoCount = findViewById(R.id.txtPantryInfoCount);
+        imgProfile = findViewById(R.id.imgProfile);
+
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            try {
+                                getContentResolver().takePersistableUriPermission(
+                                        imageUri,
+                                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                );
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+                            prefs.edit().putString(KEY_PROFILE_IMAGE, imageUri.toString()).apply();
+
+                            imgProfile.setImageURI(imageUri);
+                            Toast.makeText(this, "Profile picture updated.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
+
+        imgProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("image/*");
+            imagePickerLauncher.launch(intent);
+        });
 
         btnBack.setOnClickListener(v -> finish());
         btnEditProfile.setOnClickListener(v -> showEditProfileDialog());
@@ -55,9 +96,18 @@ public class ProfileActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         String name = prefs.getString(KEY_NAME, "John Doe");
         String email = prefs.getString(KEY_EMAIL, "john.doe@example.com");
+        String imageUriStr = prefs.getString(KEY_PROFILE_IMAGE, null);
 
         txtProfileName.setText(name);
         txtProfileEmail.setText(email);
+
+        if (imageUriStr != null && !imageUriStr.isEmpty()) {
+            try {
+                imgProfile.setImageURI(Uri.parse(imageUriStr));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadPantrySummary() {

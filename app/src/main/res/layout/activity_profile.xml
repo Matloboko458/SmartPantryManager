@@ -51,13 +51,23 @@
             android:orientation="vertical"
             android:gravity="center">
 
-            <TextView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+            <ImageView
+                android:id="@+id/imgProfile"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
                 android:background="#E8F5E9"
-                android:gravity="center"
-                android:text="👤"
-                android:textSize="40sp" />
+                android:contentDescription="Profile Picture"
+                android:scaleType="centerCrop"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Tap picture to change"
+                android:textColor="#388E3C"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/txtProfileName"
